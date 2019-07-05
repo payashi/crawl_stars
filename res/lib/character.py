@@ -11,7 +11,7 @@ class Character:
         self.hp_speed = stg.HP_SPEED
         self.speed = 3
         self.gauge = 3
-        self.gauge_speed = 0.1
+        self.gauge_speed = 0.05
         self.x = x
         self.y = y
         self.player = player
@@ -208,3 +208,41 @@ class Iwata(Character):
     def __init__(self, x, y, player, character):
         super().__init__(x, y, player, character)
         self.color = (0, 256, 128)
+        self.bullet_damage = 1000
+        self.bullet_radius = 3
+
+class Kimura(Character):
+    def __init__(self, x, y, player, character):
+        super().__init__(x, y, player, character)
+        self.color = (255, 127, 80)
+        self.hp = 6000
+        self.hp_speed = 500
+        self.speed = 2.5
+        self.gauge_speed = 0.11
+        self.bullet_damage = 1000
+        self.bullet_radius = 3
+        self.bullet_duration = 35
+
+class Sakaguchi(Character):
+    def __init__(self, x, y, player, character):
+        super().__init__(x, y, player, character)
+        self.color = (147, 112, 219)
+        self.hp = 3000
+        self.hp_speed = 500
+        self.speed = 3.5
+        self.gauge_speed = 0.11
+        self.bullet_damage = 600
+        self.bullet_radius = 2
+        self.bullet_duration = 85
+
+class Miura(Character):
+    def __init__(self, x, y, player, character):
+        super().__init__(x, y, player, character)
+        self.color = (0, 0, 0)
+        self.hp = 4500
+        self.hp_speed = 500
+        self.speed = 3
+        self.gauge_speed = 0.09
+        self.bullet_damage = 2800
+        self.bullet_radius = 4
+        self.bullet_duration = 60

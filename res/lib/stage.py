@@ -50,14 +50,17 @@ class Stage:
         for p in range(2):
             for i in range(stg.NUM_CHARACTER):
                 ch = self.players[p].characters[i]
+                for j in range(len(ch.bullets)):
+                    bul = ch.bullets[j]
+                    draw.ellipse((bul.x-ch.bullet_radius, bul.y-ch.bullet_radius,\
+                        bul.x+ch.bullet_radius, bul.y+ch.bullet_radius),
+                        fill=bul.character.color)
+        for p in range(2):
+            for i in range(stg.NUM_CHARACTER):
+                ch = self.players[p].characters[i]
                 draw.ellipse((ch.x-stg.CHARACTER_RADIUS, ch.y-stg.CHARACTER_RADIUS,\
                     ch.x+stg.CHARACTER_RADIUS, ch.y+stg.CHARACTER_RADIUS),
                     fill=ch.color, outline=self.players[p].color, width=3)
-                for j in range(len(ch.bullets)):
-                    bul = ch.bullets[j]
-                    draw.ellipse((bul.x-stg.BULLET_RADIUS, bul.y-stg.BULLET_RADIUS,\
-                        bul.x+stg.BULLET_RADIUS, bul.y+stg.BULLET_RADIUS),
-                        fill=bul.character.player.color)
         font=ImageFont.truetype('/System/Library/Fonts/ヒラギノ角ゴシック W4.ttc', 32)
         draw.text((0, 32+3), "time: {:0=3}".format(time), fill=(0, 0, 0), font=font)
         for p in range(2):

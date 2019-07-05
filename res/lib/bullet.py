@@ -7,14 +7,15 @@ class Bullet:
         self.x = x
         self.y = y
         self.speed = 10
-        self.attack = stg.BULLET_DAMAGE
+        self.attack = self.character.bullet_damage
+        self.radius = self.character.bullet_radius
         dis = utility.distance_between((x, y), (gx, gy))
         if(dis==0):
             self.vx = self.vy = 0
         else:
             self.vx = (gx-x)/dis
             self.vy = (gy-y)/dis
-        self.duration = 70
+        self.duration = self.character.bullet_duration
         self.time = self.duration
     def move(self):
         self.time -= stg.DT
@@ -31,14 +32,14 @@ class Bullet:
             obs = obstacles[i]
             if(obs.__class__.__name__=="Pond"):
                 continue
-            if(obs.x1-stg.BULLET_RADIUS<=self.x and self.x<=obs.x2+stg.BULLET_RADIUS \
-            and obs.y1-stg.BULLET_RADIUS<=self.y and self.y<=obs.y2+stg.BULLET_RADIUS):
+            if(obs.x1-self.radius<=self.x and self.x<=obs.x2+self.radius \
+            and obs.y1-self.radius<=self.y and self.y<=obs.y2+self.radius):
                 return True
         ret = False
         for i in range(stg.NUM_CHARACTER):
             ch = self.character.player.opponent().characters[i]
             if(utility.distance_between((ch.x, ch.y), (self.x, self.y)) \
-                <=stg.BULLET_RADIUS+stg.CHARACTER_RADIUS):
+                <=self.radius+stg.CHARACTER_RADIUS):
                 ch.hp -= self.attack
                 ret = True
         return ret
