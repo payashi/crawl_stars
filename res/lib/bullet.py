@@ -7,7 +7,7 @@ class Bullet:
         self.x = x
         self.y = y
         self.speed = 10
-        self.attack = 20
+        self.attack = stg.BULLET_DAMAGE
         dis = utility.distance_between((x, y), (gx, gy))
         if(dis==0):
             self.vx = self.vy = 0

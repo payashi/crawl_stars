@@ -6,8 +6,9 @@ from . import bullet
 class Character:
     def __init__(self, x, y, player, character):
         # super(Character, self).__init__()
-        self.max_hp = 50
+        self.max_hp = stg.MAX_HP
         self.hp = self.max_hp
+        self.hp_speed = stg.HP_SPEED
         self.speed = 3
         self.gauge = 3
         self.gauge_speed = 0.1
@@ -33,10 +34,11 @@ class Character:
         self.x = self.to_x
         self.y = self.to_y
     def passively_changes(self):
-        self.hp += self.hp*0.01*stg.DT
-        if(self.hp>self.max_hp): self.hp=self.max_hp
         self.gauge += self.gauge_speed*stg.DT
         if(self.gauge>3): self.gauge=3
+        if(self.gauge>=2):
+            self.hp += self.hp_speed
+        if(self.hp>self.max_hp): self.hp=self.max_hp
     def fires(self, gx, gy):
         if(self.gauge<1): return
         self.gauge -= 1

@@ -15,8 +15,8 @@ def main():
         lib.Player((0, 0, 256), "matope", 1)
     )
     t = 0
-    while(t<=stg.MAX_TIME):
-        sys.stdout.write("\rtime: {:0=3} / {} s".format(t, stg.MAX_TIME))
+    while(t<=stg.MAX_FRAME):
+        sys.stdout.write("\rtime: {:0=3} / {} s".format(t, stg.MAX_FRAME))
         sys.stdout.flush()
         time.sleep(0.01)
         for p in range(2):
