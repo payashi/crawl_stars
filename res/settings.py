@@ -1,0 +1,11 @@
+WIDTH = 600
+HEIGHT = 1000
+MAX_TIME = 500
+NUM_CHARACTER = 5
+CHARACTER_RADIUS = 15
+BULLET_RADIUS = 2
+DT = 1
+MICRO = 10**(-7)
+INF = HEIGHT/MICRO
+color_background = (256, 256, 256)
+color_outline = (0, 0, 0)
