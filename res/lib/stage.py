@@ -66,7 +66,7 @@ class Stage:
                 fill=pl.color, font=font)
         self.images.append(im)
     def outputs(self):
-        self.images[0].save('brawl_stars/outputs/brawl_stars.gif', save_all=True, append_images=self.images[1:],
+        self.images[0].save('crawl_stars/outputs/crawl_stars.gif', save_all=True, append_images=self.images[1:],
                 optimize=False, duration=40)
 class SimpleStage(Stage):
     def __init__(self):
