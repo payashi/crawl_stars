@@ -10,6 +10,7 @@ class Stage:
         self.second_player = None
         self.players = []
         self.images = []
+        self.frame = 0
     def register_players(self, first_player, second_player):
         first_player.stage = self
         second_player.stage = self
@@ -20,6 +21,7 @@ class Stage:
         for p in range(2):
             for i in range(stg.NUM_CHARACTER):
                 ch = self.players[p].characters[i]
+                ch.successively_fires()
                 ch.actually_moves()
     def bullets_move(self):
         for p in range(2):
@@ -40,7 +42,7 @@ class Stage:
                     ch.respawns()
     def opponent_player(self, player):
         return self.first_player if player == self.second_player else self.second_player
-    def draw_field(self, time):
+    def draw_field(self):
         im = Image.new('RGB', (stg.WIDTH, stg.HEIGHT), stg.color_background)
         draw = ImageDraw.Draw(im)
         for i in range(len(self.obstacles)):
@@ -62,7 +64,7 @@ class Stage:
                     ch.x+stg.CHARACTER_RADIUS, ch.y+stg.CHARACTER_RADIUS),
                     fill=ch.color, outline=self.players[p].color, width=3)
         font=ImageFont.truetype('/System/Library/Fonts/ヒラギノ角ゴシック W4.ttc', 32)
-        draw.text((0, 32+3), "time: {:0=3}".format(time), fill=(0, 0, 0), font=font)
+        draw.text((0, 32+3), "frame: {:0=3}".format(self.frame), fill=(0, 0, 0), font=font)
         for p in range(2):
             pl = self.players[p]
             draw.text((p*stg.WIDTH/2, 0), "{}: {}".format(pl.name, pl.kill),\

@@ -11,12 +11,11 @@ import lib
 def main():
     st = lib.SimpleStage()
     st.register_players(
-        lib.Player((256, 0, 0), "hayashi", 0),
-        lib.Player((0, 0, 256), "matope", 1)
+        lib.Player((256, 0, 0), "Kimura", 0),
+        lib.Player((0, 0, 256), "Sakaguchi", 1)
     )
-    t = 0
-    while(t<=stg.MAX_FRAME):
-        sys.stdout.write("\rtime: {:0=3} / {} s".format(t, stg.MAX_FRAME))
+    while(st.frame<=stg.MAX_FRAME):
+        sys.stdout.write("\rframe: {:0=3} / {} frame".format(st.frame, stg.MAX_FRAME))
         sys.stdout.flush()
         time.sleep(0.01)
         for p in range(2):
@@ -27,8 +26,8 @@ def main():
         st.bullets_move()
         st.characters_move()
         st.characters_respawn()
-        st.draw_field(t)
-        t += 1
+        if(st.frame%int(round(1/stg.DT))==0): st.draw_field()
+        st.frame += 1
     sys.stdout.write("\nnow drawing...")
     st.outputs()
     sys.stdout.write("\033[2K\033[G")

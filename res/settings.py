@@ -1,10 +1,10 @@
 WIDTH = 600
 HEIGHT = 1000
-NUM_CHARACTER = 3
+NUM_CHARACTER = 5
 CHARACTER_RADIUS = 15
 BULLET_RADIUS = 2
-DT = 1
-MAX_FRAME = 600
+DT = 0.5 # it should be 1/n (n is integer)
+MAX_FRAME = 1200
 MICRO = 10**(-7)
 INF = HEIGHT/MICRO
 color_background = (256, 256, 256)

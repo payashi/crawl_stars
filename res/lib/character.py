@@ -21,28 +21,48 @@ class Character:
         self.to_y = self.y
         self.respawn_x = self.x
         self.respawn_y = self.y
+        self.max_succession = 3
+        self.bullet_to_x = 0
+        self.bullet_to_y = 0
+        self.frame = 0
+        self.last_attack_frame = None
+        self.bullet_attack_interval_second = 2
+        self.attack_interval_frame = int(round(self.bullet_attack_interval_second/stg.DT))
     def move_toward(self, dest):
-        x, y = dest
-        dis=((x-self.x)**2+(y-self.y)**2)**0.5
+        dis = utility.distance_between((self.x, self.y), dest)
         if(dis<=self.speed*stg.DT):
-            self.to_x = x
-            self.to_y = y
+            self.to_x = dest[0]
+            self.to_y = dest[1]
         else:
-            self.to_x = self.x+(self.speed*stg.DT/dis)*(x-self.x)
-            self.to_y = self.y+(self.speed*stg.DT/dis)*(y-self.y)
+            self.to_x = self.x+(self.speed*stg.DT/dis)*(dest[0]-self.x)
+            self.to_y = self.y+(self.speed*stg.DT/dis)*(dest[1]-self.y)
     def actually_moves(self):
         self.x = self.to_x
         self.y = self.to_y
     def passively_changes(self):
+        self.frame += 1
         self.gauge += self.gauge_speed*stg.DT
         if(self.gauge>3): self.gauge=3
         if(self.gauge>=2):
-            self.hp += self.hp_speed
+            self.hp += self.hp_speed*stg.DT
         if(self.hp>self.max_hp): self.hp=self.max_hp
+    def successively_fires(self):
+        if(self.last_attack_frame == None or self.last_attack_frame == self.frame): return
+        after_fire = self.last_attack_frame+self.attack_interval_frame*self.max_succession - self.frame
+        if(after_fire>0 and after_fire%self.attack_interval_frame==0):
+            self.bullets.append(bullet.Bullet(self.x, self.y, self.x+self.bullet_to_x, self.y+self.bullet_to_y, self))
     def fires(self, gx, gy):
         if(self.gauge<1): return
+        if(self.last_attack_frame != None and self.frame<self.last_attack_frame+self.attack_interval_frame*self.max_succession): return
         self.gauge -= 1
+        self.last_attack_frame = self.frame
         self.bullets.append(bullet.Bullet(self.x, self.y, gx, gy, self))
+        dis = utility.distance_between((self.x, self.y), (gx, gy))
+        if(dis==0):
+            self.bullet_to_x = self.bullet_to_y = 0
+        else:
+            self.bullet_to_x = (gx-self.x)/dis
+            self.bullet_to_y = (gy-self.y)/dis
     def respawns(self):
         self.x = self.respawn_x
         self.y = self.respawn_y
@@ -50,6 +70,8 @@ class Character:
         self.gauge = 3
         self.to_x = self.x
         self.to_y = self.y
+        self.frame = 0
+        self.last_attack_frame = None
     def detour_toward(self, x1, y1, x2, y2, shorter=True, right=True):
         if(abs(x1-x2)+abs(y1-y2)==0): return (x2, y2)
         min_dis = stg.INF
@@ -218,10 +240,12 @@ class Kimura(Character):
         self.hp = 6000
         self.hp_speed = 500
         self.speed = 2.5
-        self.gauge_speed = 0.11
+        self.gauge_speed = 0.11*0.3
         self.bullet_damage = 1000
         self.bullet_radius = 3
         self.bullet_duration = 35
+        self.max_succession = 2
+        self.bullet_attack_interval_second = 0.5 # it should be DT*n (n is integer)
 
 class Sakaguchi(Character):
     def __init__(self, x, y, player, character):
@@ -230,10 +254,12 @@ class Sakaguchi(Character):
         self.hp = 3000
         self.hp_speed = 500
         self.speed = 3.5
-        self.gauge_speed = 0.11
+        self.gauge_speed = 0.11*0.3
         self.bullet_damage = 600
         self.bullet_radius = 2
         self.bullet_duration = 85
+        self.max_succession = 4
+        self.bullet_attack_interval_second = 0.5
 
 class Miura(Character):
     def __init__(self, x, y, player, character):
@@ -242,7 +268,9 @@ class Miura(Character):
         self.hp = 4500
         self.hp_speed = 500
         self.speed = 3
-        self.gauge_speed = 0.09
+        self.gauge_speed = 0.09*0.3
         self.bullet_damage = 2800
         self.bullet_radius = 4
         self.bullet_duration = 60
+        self.max_succession = 1
+        self.bullet_attack_interval_second = 0.5
