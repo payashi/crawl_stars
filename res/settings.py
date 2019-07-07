@@ -1,7 +1,6 @@
 WIDTH = 600
 HEIGHT = 1000
 NUM_CHARACTER = 5
-CHARACTER_RADIUS = 15
 BULLET_RADIUS = 2
 DT = 0.5 # it should be 1/n (n is integer)
 MAX_FRAME = 1200

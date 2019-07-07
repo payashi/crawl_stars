@@ -1,5 +1,6 @@
 import settings as stg
 from . import utility
+from . import character
 
 class Bullet:
     def __init__(self, x, y, gx, gy, character):
@@ -45,10 +46,6 @@ class Bullet:
                 return True
         ret = False
         for ch in self.character.player.opponent().characters:
-            if(ch.__class__.__name__=="Kimura" and ch.status=="lethal"):
-                continue
-            if(utility.distance_between((ch.x, ch.y), (self.x, self.y)) \
-                <=self.radius+ch.radius):
-                if(ch.frame > int(round(50/stg.DT))): ch.hp -= self.attack
+            if(character.Character.damage_to(ch, self.attack)):
                 ret = True
         return ret

@@ -30,14 +30,14 @@ class Obstacle:
         x = self.x1 if i%3==0 else self.x2
         y = self.y1 if i<2 else self.y2
         return (x, y)
-    def ith_virtual_vertex(self, i):
+    def ith_virtual_vertex(self, i, radius):
         i = (i+4)%4
         x, y = self.ith_vertex(i)
         interval_correction = 1.0
-        x += -stg.CHARACTER_RADIUS*interval_correction if(i%3==0) \
-            else +stg.CHARACTER_RADIUS*interval_correction
-        y += -stg.CHARACTER_RADIUS*interval_correction if(i<2) \
-            else +stg.CHARACTER_RADIUS*interval_correction
+        x += -radius*interval_correction if(i%3==0) \
+            else +radius*interval_correction
+        y += -radius*interval_correction if(i<2) \
+            else +radius*interval_correction
         return (x, y)
 class Wall(Obstacle):
     def __init__(self, x1, y1, x2, y2):

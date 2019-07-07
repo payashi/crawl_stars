@@ -30,8 +30,7 @@ class Character:
         self.bullet_attack_interval_second = 2
         self.attack_interval_frame = int(round(self.bullet_attack_interval_second/stg.DT))
         self.lethal_gauge = 1
-        self.lethal_speed = 0.03*0
-        self.radius = stg.CHARACTER_RADIUS
+        self.radius = 15
         self.lethal_color = (255, 255, 0)
         self.status = "normal"
         self.lethal_gauge_speed =  0.03
@@ -65,19 +64,21 @@ class Character:
     def actual_move(self):
         self.x = self.to_x
         self.y = self.to_y
-    def passive_change(stage):
+    def all_passive_change(stage):
         for p in stage.players:
             for ch in p.characters:
-                ch.frame += 1
-                ch.gauge += ch.gauge_speed*stg.DT
-                if(ch.gauge>3): ch.gauge=3
-                if(ch.gauge>=2):
-                    ch.hp += ch.hp_speed*stg.DT
-                if(ch.hp>ch.max_hp): ch.hp=ch.max_hp
-                ch.lethal_gauge += ch.lethal_gauge_speed*stg.DT
-                if(ch.lethal_gauge>1): ch.lethal_gauge=1
-                if(ch.status=="successive" and ch.last_attack_frame+ch.attack_interval_frame*ch.max_succession<=ch.frame):
-                    ch.status = "normal"
+                ch.passive_change()
+    def passive_change(self):
+        self.frame += 1
+        self.gauge += self.gauge_speed*stg.DT
+        if(self.gauge>3): self.gauge=3
+        if(self.gauge>=2):
+            self.hp += self.hp_speed*stg.DT
+        if(self.hp>self.max_hp): self.hp=self.max_hp
+        self.lethal_gauge += self.lethal_gauge_speed*stg.DT
+        if(self.lethal_gauge>1): self.lethal_gauge=1
+        if(self.status=="successive" and self.last_attack_frame+self.attack_interval_frame*self.max_succession<=self.frame):
+            self.status = "normal"
     def successive_fire(self):
         if(self.status=="successive" and self.last_attack_frame!=self.frame):
             after_fire = self.last_attack_frame+self.attack_interval_frame*self.max_succession - self.frame
@@ -97,6 +98,10 @@ class Character:
             self.bullet_to_x = (gx-self.x)/dis
             self.bullet_to_y = (gy-self.y)/dis
         return True
+    def damage_to(ch, damage):
+        if(ch.__class__.__name__=="Kimura" and ch.status=="lethal"): return False
+        if(ch.frame <= int(round(50/stg.DT))): return False
+        return True
     def detour_toward(self, x1, y1, x2, y2, shorter=True, right=True):
         if(abs(x1-x2)+abs(y1-y2)==0): return (x2, y2)
         min_dis = stg.INF
@@ -104,11 +109,11 @@ class Character:
         obstacles = self.player.stage.obstacles
         for obs in self.player.stage.obstacles:
             # if (x2, y2) is inside of obs
-            if(obs.x1-stg.CHARACTER_RADIUS<x2 and x2<obs.x2+stg.CHARACTER_RADIUS \
-            and obs.y1-stg.CHARACTER_RADIUS<y2 and y2<obs.y2+stg.CHARACTER_RADIUS):
+            if(obs.x1-self.radius<x2 and x2<obs.x2+self.radius \
+            and obs.y1-self.radius<y2 and y2<obs.y2+self.radius):
                 for i in range(4):
-                    vx1, vy1 = obs.ith_virtual_vertex(i)
-                    vx2, vy2 = obs.ith_virtual_vertex(i+1)
+                    vx1, vy1 = obs.ith_virtual_vertex(i, self.radius)
+                    vx2, vy2 = obs.ith_virtual_vertex(i+1, self.radius)
                     if(i%2==0):
                         cx, cy = obstacle.collision_check(self, x2, y2, vx1, vx2, vy1, True)
                     else:
@@ -133,17 +138,17 @@ class Character:
                     if(len(col)==4):
                         vr, vl = ((0, 0), (0, 0))
                         if(plus_x and plus_y):
-                            vr = obs.ith_virtual_vertex(3)
-                            vl = obs.ith_virtual_vertex(1)
+                            vr = obs.ith_virtual_vertex(3, self.radius)
+                            vl = obs.ith_virtual_vertex(1, self.radius)
                         elif(plus_x and not plus_y):
-                            vr = obs.ith_virtual_vertex(2)
-                            vl = obs.ith_virtual_vertex(0)
+                            vr = obs.ith_virtual_vertex(2, self.radius)
+                            vl = obs.ith_virtual_vertex(0, self.radius)
                         elif(not plus_x and plus_y):
-                            vr = obs.ith_virtual_vertex(0)
-                            vl = obs.ith_virtual_vertex(2)
+                            vr = obs.ith_virtual_vertex(0, self.radius)
+                            vl = obs.ith_virtual_vertex(2, self.radius)
                         elif(not plus_x and not plus_y):
-                            vr = obs.ith_virtual_vertex(1)
-                            vl = obs.ith_virtual_vertex(3)
+                            vr = obs.ith_virtual_vertex(1, self.radius)
+                            vl = obs.ith_virtual_vertex(3, self.radius)
                         right_dis = utility.distance_between((x1, y1), vr)+ \
                                     utility.distance_between(vr, (x2, y2))
                         left_dis = utility.distance_between((x1, y1), vl)+ \
@@ -156,7 +161,7 @@ class Character:
                     elif(0 in col and 2 in col):
                         vv = []
                         for i in range(4):
-                            vv.append(obs.ith_virtual_vertex(i))
+                            vv.append(obs.ith_virtual_vertex(i, self.radius))
                         if(plus_y):
                             right_dis = utility.distance_between((x1, y1), vv[0])+ \
                                         utility.distance_between(vv[0], vv[3])+ \
@@ -174,17 +179,17 @@ class Character:
                         index = 1 if plus_y else 3
                         if right_dis<left_dis:
                             index += 3
-                            next_edge = obs.ith_virtual_vertex(index+3)
+                            next_edge = obs.ith_virtual_vertex(index+3, self.radius)
                             if obs.collision_between(self, next_edge[0], next_edge[1])[0]==[]:
                                 index += 3
                         else:
-                            next_edge = obs.ith_virtual_vertex(index+1)
+                            next_edge = obs.ith_virtual_vertex(index+1, self.radius)
                             if obs.collision_between(self, next_edge[0], next_edge[1])[0]==[]:
                                 index += 1
                     elif(1 in col and 3 in col):
                         vv = []
                         for i in range(4):
-                            vv.append(obs.ith_virtual_vertex(i))
+                            vv.append(obs.ith_virtual_vertex(i, self.radius))
                         if(plus_x):
                             right_dis = utility.distance_between((x1, y1), vv[3])+ \
                                         utility.distance_between(vv[3], vv[2])+ \
@@ -202,11 +207,11 @@ class Character:
                         index = 0 if plus_x else 2
                         if right_dis<left_dis:
                             index += 3
-                            next_x, next_y = obs.ith_virtual_vertex(index+3)
+                            next_x, next_y = obs.ith_virtual_vertex(index+3, self.radius)
                             if obs.collision_between(self, next_x, next_y)[0]==[]:
                                 index += 3
                         else:
-                            next_x, next_y = obs.ith_virtual_vertex(index+1)
+                            next_x, next_y = obs.ith_virtual_vertex(index+1, self.radius)
                             if obs.collision_between(self, next_x, next_y)[0]==[]:
                                 index += 1
                     elif(col==[0, 1]):
@@ -217,7 +222,7 @@ class Character:
                         index = 3
                     elif(col==[0, 3]):
                         index = 0
-                    if(index!=-1): ret = obs.ith_virtual_vertex(index%4)
+                    if(index!=-1): ret = obs.ith_virtual_vertex(index%4, self.radius)
                 else:
                     if(len(col)==4):
                         if(plus_x):
@@ -229,22 +234,22 @@ class Character:
                         index = 1 if plus_y else 3
                         if right:
                             index += 3
-                            next_x, next_y = obs.ith_virtual_vertex(index+3)
+                            next_x, next_y = obs.ith_virtual_vertex(index+3, self.radius)
                             if obs.collision_between(self, next_x, next_y)[0]==[]:
                                 index += 3
                         else:
-                            next_x, next_y = obs.ith_virtual_vertex(index+1)
+                            next_x, next_y = obs.ith_virtual_vertex(index+1, self.radius)
                             if obs.collision_between(self, next_x, next_y)[0]==[]:
                                 index += 1
                     elif(1 in col and 3 in col):
                         index = 0 if plus_x else 2
                         if right:
                             index += 3
-                            next_x, next_y = obs.ith_virtual_vertex(index+3)
+                            next_x, next_y = obs.ith_virtual_vertex(index+3, self.radius)
                             if obs.collision_between(self, next_x, next_y)[0]==[]:
                                 index += 3
                         else:
-                            next_x, next_y = obs.ith_virtual_vertex(index+1)
+                            next_x, next_y = obs.ith_virtual_vertex(index+1, self.radius)
                             if obs.collision_between(self, next_x, next_y)[0]==[]:
                                 index += 1
                     elif(col==[0, 1]):
@@ -259,7 +264,7 @@ class Character:
                     elif(col==[0, 3]):
                         index = 0 if plus_x else 1
                         if right: index += 3
-                    if(index!=-1): ret = obs.ith_virtual_vertex(index%4)
+                    if(index!=-1): ret = obs.ith_virtual_vertex(index%4, self.radius)
         if(ret != (None, None)):
             iw = ret
             ret = self.detour_toward(x1, y1, ret[0], ret[1], shorter, right)
@@ -293,6 +298,7 @@ class Kimura(Character):
         self.lethal_speed = 5
         self.lethal_damage = 4000
         self.lethal_dest = (None, None)
+        self.radius = 30
     def lethal_blow(self, x, y): # kimura press
         if(not self.valid_lethal_blow(x, y)): return
         self.lethal_gauge = 0
@@ -352,3 +358,46 @@ class Miura(Character):
         self.bullet_duration = 60
         self.max_succession = 1
         self.bullet_attack_interval_second = 0.5
+        self.great_kick_duration = 5
+        self.latest_lethal_frame = None
+        self.lethal_dest = (None, None)
+        self.lethal_damage = 4000
+        self.lethal_gauge_speed = 0
+    def lethal_blow(self, x, y): # great kick
+        if(not self.valid_lethal_blow(x, y)): return
+        self.lethal_gauge = 0
+        self.status = "lethal"
+        self.last_attack_frame = None
+        self.lethal_dest = (x, y)
+        self.latest_lethal_frame = self.frame
+    def valid_lethal_blow(self, x, y):
+        if(self.lethal_gauge<1): return False
+        dis = utility.distance_between((self.x, self.y), (x, y))
+        if(dis<stg.MICRO): return False
+        return True
+    def actual_move(self):
+        if(self.status=="lethal"):
+            k, b = obstacle.set_up_equation((self.x, self.y), self.lethal_dest)
+            for ch in self.player.opponent().characters:
+                if(k==stg.INF):
+                    if(abs(ch.x-self.x)<=self.radius+ch.radius and (self.lethal_dest[1]-self.y)*(ch.y-self.y)>=0):
+                        Character.damage_to(ch, self.lethal_damage)
+                else:
+                    pass
+            return
+        self.x = self.to_x
+        self.y = self.to_y
+    def passive_change(self):
+        self.frame += 1
+        self.gauge += self.gauge_speed*stg.DT
+        if(self.gauge>3): self.gauge=3
+        if(self.gauge>=2):
+            self.hp += self.hp_speed*stg.DT
+        if(self.hp>self.max_hp): self.hp=self.max_hp
+        self.lethal_gauge += self.lethal_gauge_speed*stg.DT
+        if(self.lethal_gauge>1): self.lethal_gauge=1
+        if(self.status=="successive" and self.last_attack_frame+self.attack_interval_frame*self.max_succession<=self.frame):
+            self.status = "normal"
+        if(self.status=="lethal" and self.frame>=self.latest_lethal_frame+(self.great_kick_duration/stg.DT)):
+            self.status = "normal"
+            self.lethal_gauge = 0

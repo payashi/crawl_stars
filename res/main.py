@@ -11,14 +11,14 @@ import lib
 def main():
     st = lib.SimpleStage()
     st.register_players(
-        lib.Player((256, 0, 0), "Sakaguchi", 0),
+        lib.Player((256, 0, 0), "Miura", 0),
         lib.Player((0, 0, 256), "Kimura", 1)
     )
     while(st.frame<=stg.MAX_FRAME):
         sys.stdout.write("\rframe: {:0=3} / {} frame".format(st.frame, stg.MAX_FRAME))
         sys.stdout.flush()
         time.sleep(0.01)
-        lib.Character.passive_change(st)
+        lib.Character.all_passive_change(st)
         hayashi_moves(st.players[0])
         hayashi_moves(st.players[1])
         lib.Bullet.all_move(st)
@@ -38,7 +38,6 @@ def hayashi_moves(player): # 0th player
     for ch in player.characters:
         tmp = enemy.characters[stg.NUM_CHARACTER-1-ch.index]
         if(ch.__class__.__name__=="Kimura"):
-            # ch.attack("lethal")
             if(ch.status=="lethal"):
                 pass
             elif(ch.valid_lethal_blow(tmp.x, tmp.y)):
@@ -47,8 +46,14 @@ def hayashi_moves(player): # 0th player
                 ch.move_toward(ch.detour_toward(ch.x, ch.y, tmp.x, tmp.y, True, False))
                 ch.fire(tmp.x, tmp.y)
         else:
-            ch.move_toward(ch.detour_toward(ch.x, ch.y, tmp.x, tmp.y, True, False))
-            ch.fire(tmp.x, tmp.y)
+            if(ch.status=="lethal"):
+                pass
+            elif(ch.valid_lethal_blow(tmp.x, tmp.y)):
+                ch.lethal_blow(tmp.x, tmp.y)
+            else:
+                ch.move_toward(ch.detour_toward(ch.x, ch.y, tmp.x, tmp.y, True, False))
+                ch.fire(tmp.x, tmp.y)
+
         # ch.move_toward(ch.detour_toward(ch.x, ch.y, tmp.x, tmp.y, True, False))
         # ch.fire(tmp.x, tmp.y)
 def matope_moves(player): # 1st player
