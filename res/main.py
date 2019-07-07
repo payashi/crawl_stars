@@ -11,22 +11,23 @@ import lib
 def main():
     st = lib.SimpleStage()
     st.register_players(
-        lib.Player((256, 0, 0), "Kimura", 0),
-        lib.Player((0, 0, 256), "Sakaguchi", 1)
+        lib.Player((256, 0, 0), "Sakaguchi", 0),
+        lib.Player((0, 0, 256), "Kimura", 1)
     )
     while(st.frame<=stg.MAX_FRAME):
         sys.stdout.write("\rframe: {:0=3} / {} frame".format(st.frame, stg.MAX_FRAME))
         sys.stdout.flush()
         time.sleep(0.01)
-        for p in range(2):
-            for i in range(stg.NUM_CHARACTER):
-                st.players[p].characters[i].passively_changes()
+        for p in st.players:
+            for ch in p.characters:
+                ch.passively_changes()
         hayashi_moves(st.players[0])
-        matope_moves(st.players[1])
+        hayashi_moves(st.players[1])
         st.bullets_move()
         st.characters_move()
         st.characters_respawn()
         if(st.frame%int(round(1/stg.DT))==0): st.draw_field()
+        # st.draw_field()
         st.frame += 1
     sys.stdout.write("\nnow drawing...")
     st.outputs()
@@ -35,20 +36,37 @@ def main():
 
 # customized movements for each player
 def hayashi_moves(player): # 0th player
-    enemy = player.stage.players[(player.index+1)%2]
-    for i in range(stg.NUM_CHARACTER):
-        ch = player.characters[i]
-        tmp = enemy.characters[stg.NUM_CHARACTER-1-i]
-        # tmp = enemy[i]
-        ch.move_toward(ch.detour_toward(ch.x, ch.y, tmp.x, tmp.y, True, False))
-        ch.fires(tmp.x, tmp.y)
+    enemy = player.opponent()
+    for ch in player.characters:
+        tmp = enemy.characters[stg.NUM_CHARACTER-1-ch.index]
+        if(ch.__class__.__name__=="Kimura"):
+            if(ch.status=="lethal"):
+                pass
+            elif(ch.valid_lethal_attack(tmp.x, tmp.y)):
+                ch.lethal_attack(tmp.x, tmp.y)
+            else:
+                ch.move_toward(ch.detour_toward(ch.x, ch.y, tmp.x, tmp.y, True, False))
+                ch.fires(tmp.x, tmp.y)
+        else:
+            ch.move_toward(ch.detour_toward(ch.x, ch.y, tmp.x, tmp.y, True, False))
+            ch.fires(tmp.x, tmp.y)
+        # ch.move_toward(ch.detour_toward(ch.x, ch.y, tmp.x, tmp.y, True, False))
+        # ch.fires(tmp.x, tmp.y)
 def matope_moves(player): # 1st player
     enemy = player.stage.players[(player.index+1)%2]
-    for i in range(stg.NUM_CHARACTER):
-        ch = player.characters[i]
-        tmp = enemy.characters[stg.NUM_CHARACTER-1-i]
+    for ch in player.characters:
+        tmp = enemy.characters[stg.NUM_CHARACTER-1-ch.index]
         # tmp = enemy[i]
-        ch.move_toward(ch.detour_toward(ch.x, ch.y, tmp.x, tmp.y, True, False))
-        ch.fires(tmp.x, tmp.y)
+        if(ch.__class__.__name__=="Kimura"):
+            if(ch.status=="lethal"):
+                pass
+            elif(ch.valid_lethal_attack(tmp.x, tmp.y)):
+                ch.lethal_attack(tmp.x, tmp.y)
+            else:
+                ch.move_toward(ch.detour_toward(ch.x, ch.y, tmp.x, tmp.y, True, False))
+                ch.fires(tmp.x, tmp.y)
+        else:
+            ch.move_toward(ch.detour_toward(ch.x, ch.y, tmp.x, tmp.y, True, False))
+            ch.fires(tmp.x, tmp.y)
 
 main()

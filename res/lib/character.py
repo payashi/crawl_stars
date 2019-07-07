@@ -1,7 +1,8 @@
+from PIL import Image, ImageDraw, ImageFont
 import settings as stg
 from . import utility
 from . import bullet
-
+from .  import obstacle
 
 class Character:
     def __init__(self, x, y, player, character):
@@ -28,6 +29,12 @@ class Character:
         self.last_attack_frame = None
         self.bullet_attack_interval_second = 2
         self.attack_interval_frame = int(round(self.bullet_attack_interval_second/stg.DT))
+        self.lethal_gauge = 1
+        self.lethal_speed = 0.03*0
+        self.radius = stg.CHARACTER_RADIUS
+        self.lethal_color = (255, 255, 0)
+        self.status = "normal"
+        self.lethal_gauge_speed =  0.03
     def move_toward(self, dest):
         dis = utility.distance_between((self.x, self.y), dest)
         if(dis<=self.speed*stg.DT):
@@ -46,15 +53,20 @@ class Character:
         if(self.gauge>=2):
             self.hp += self.hp_speed*stg.DT
         if(self.hp>self.max_hp): self.hp=self.max_hp
+        self.lethal_gauge += self.lethal_gauge_speed*stg.DT
+        if(self.lethal_gauge>1): self.lethal_gauge=1
+        if(self.status=="successive" and self.last_attack_frame+self.attack_interval_frame*self.max_succession<=self.frame):
+            self.status = "normal"
     def successively_fires(self):
-        if(self.last_attack_frame == None or self.last_attack_frame == self.frame): return
-        after_fire = self.last_attack_frame+self.attack_interval_frame*self.max_succession - self.frame
-        if(after_fire>0 and after_fire%self.attack_interval_frame==0):
-            self.bullets.append(bullet.Bullet(self.x, self.y, self.x+self.bullet_to_x, self.y+self.bullet_to_y, self))
+        if(self.status=="successive" and self.last_attack_frame!=self.frame):
+            after_fire = self.last_attack_frame+self.attack_interval_frame*self.max_succession - self.frame
+            if(after_fire%self.attack_interval_frame==0):
+                self.bullets.append(bullet.Bullet(self.x, self.y, self.x+self.bullet_to_x, self.y+self.bullet_to_y, self))
     def fires(self, gx, gy):
-        if(self.gauge<1): return
-        if(self.last_attack_frame != None and self.frame<self.last_attack_frame+self.attack_interval_frame*self.max_succession): return
+        if(self.status in ["lethal", "successive"]): return False
+        if(self.gauge<1): return False
         self.gauge -= 1
+        self.status = "successive"
         self.last_attack_frame = self.frame
         self.bullets.append(bullet.Bullet(self.x, self.y, gx, gy, self))
         dis = utility.distance_between((self.x, self.y), (gx, gy))
@@ -63,6 +75,7 @@ class Character:
         else:
             self.bullet_to_x = (gx-self.x)/dis
             self.bullet_to_y = (gy-self.y)/dis
+        return True
     def respawns(self):
         self.x = self.respawn_x
         self.y = self.respawn_y
@@ -71,14 +84,31 @@ class Character:
         self.to_x = self.x
         self.to_y = self.y
         self.frame = 0
+        self.status = "normal"
         self.last_attack_frame = None
     def detour_toward(self, x1, y1, x2, y2, shorter=True, right=True):
         if(abs(x1-x2)+abs(y1-y2)==0): return (x2, y2)
         min_dis = stg.INF
         ret = (None, None)
         obstacles = self.player.stage.obstacles
-        for i in range(len(obstacles)):
-            obs = obstacles[i]
+        for obs in self.player.stage.obstacles:
+            # if (x2, y2) is inside of obs
+            if(obs.x1-stg.CHARACTER_RADIUS<x2 and x2<obs.x2+stg.CHARACTER_RADIUS \
+            and obs.y1-stg.CHARACTER_RADIUS<y2 and y2<obs.y2+stg.CHARACTER_RADIUS):
+                for i in range(4):
+                    vx1, vy1 = obs.ith_virtual_vertex(i)
+                    vx2, vy2 = obs.ith_virtual_vertex(i+1)
+                    if(i%2==0):
+                        cx, cy = obstacle.horizontal_collision_check(x1, y1, x2, y2, vx1, vx2, vy1)
+                    else:
+                        cx, cy = obstacle.vertical_collision_check(x1, y1, x2, y2, vy1, vy2, vx1)
+                    if(cx!=None):
+                        dis = utility.distance_between((x1, y1), (cx, cy))
+                        if(dis<min_dis):
+                            min_dis = dis
+                            ret = (cx, cy)
+                continue
+            # else
             col, dis = obs.collides_between(x1, y1, x2, y2)
             index = -1
             text_col = []
@@ -237,6 +267,7 @@ class Kimura(Character):
     def __init__(self, x, y, player, character):
         super().__init__(x, y, player, character)
         self.color = (255, 127, 80)
+        self.lethal_color = (255, 255, 0)
         self.hp = 6000
         self.hp_speed = 500
         self.speed = 2.5
@@ -246,11 +277,49 @@ class Kimura(Character):
         self.bullet_duration = 35
         self.max_succession = 2
         self.bullet_attack_interval_second = 0.5 # it should be DT*n (n is integer)
-
+        self.kimura_press_jump_range = 180
+        self.kimura_press_attack_range = 80
+        self.lethal_speed = 5
+        self.lethal_damage = 4000
+        self.lethal_dest = (None, None)
+    def lethal_attack(self, x, y): # kimura press
+        if(not self.valid_lethal_attack(x, y)): return
+        self.lethal_gauge = 0
+        self.status = "lethal"
+        self.last_attack_frame = None
+        self.lethal_dest = (x, y)
+    def valid_lethal_attack(self, x, y):
+        if(self.lethal_gauge<1): return False
+        dis = utility.distance_between((self.x, self.y), (x, y))
+        if(dis>self.kimura_press_jump_range): return False
+        for obs in self.player.stage.obstacles:
+            if(obs.x1-self.radius<x and x<obs.x2+self.radius \
+            and obs.y1-self.radius<y and y<obs.y2+self.radius):
+                return False
+        return True
+    def lethal_move(self):
+        dis = utility.distance_between((self.x, self.y), self.lethal_dest)
+        if(dis<=self.lethal_speed*stg.DT):
+            self.to_x,  self.to_y  = self.lethal_dest
+            self.status = "normal"
+            self.lethal_gauge = 0
+            for ch in self.player.opponent().characters:
+                d = utility.distance_between(self.lethal_dest, (ch.x, ch.y))
+                if(d<=self.kimura_press_attack_range and ch.frame > int(round(50/stg.DT))):
+                    ch.hp -= self.lethal_damage
+        else:
+            self.to_x = self.x+(self.lethal_speed*stg.DT/dis)*(self.lethal_dest[0]-self.x)
+            self.to_y = self.y+(self.lethal_speed*stg.DT/dis)*(self.lethal_dest[1]-self.y)
+    def actually_moves(self):
+        if(self.status=="lethal"):
+            self.lethal_move()
+        self.x = self.to_x
+        self.y = self.to_y
 class Sakaguchi(Character):
     def __init__(self, x, y, player, character):
         super().__init__(x, y, player, character)
-        self.color = (147, 112, 219)
+        self.color = (102, 0, 255)
+        # self.lethal_color = (255, 0, 255)
         self.hp = 3000
         self.hp_speed = 500
         self.speed = 3.5

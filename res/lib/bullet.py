@@ -18,28 +18,28 @@ class Bullet:
         self.duration = self.character.bullet_duration
         self.time = self.duration
     def move(self):
-        self.time -= stg.DT
-        if(self.time == self.duration-stg.DT):
+        if(self.time == self.duration):
+            self.time -= stg.DT
             return not self.collides_with_sth()
+        self.time -= stg.DT
         self.x += self.vx*stg.DT*self.speed
         self.y += self.vy*stg.DT*self.speed
         if(self.time<0 or self.collides_with_sth()):
-            return False # that means this bullet has end its life
+            return False # that means this bullet has ended its life
         return True
     def collides_with_sth(self):
-        obstacles = self.character.player.stage.obstacles
-        for i in range(len(obstacles)):
-            obs = obstacles[i]
+        for obs in self.character.player.stage.obstacles:
             if(obs.__class__.__name__=="Pond"):
                 continue
-            if(obs.x1-self.radius<=self.x and self.x<=obs.x2+self.radius \
-            and obs.y1-self.radius<=self.y and self.y<=obs.y2+self.radius):
+            if(obs.x1-self.radius<self.x and self.x<obs.x2+self.radius \
+            and obs.y1-self.radius<self.y and self.y<obs.y2+self.radius):
                 return True
         ret = False
-        for i in range(stg.NUM_CHARACTER):
-            ch = self.character.player.opponent().characters[i]
+        for ch in self.character.player.opponent().characters:
+            if(ch.__class__.__name__=="Kimura" and ch.status=="lethal"):
+                continue
             if(utility.distance_between((ch.x, ch.y), (self.x, self.y)) \
-                <=self.radius+stg.CHARACTER_RADIUS):
-                ch.hp -= self.attack
+                <=self.radius+ch.radius):
+                if(ch.frame > int(round(50/stg.DT))): ch.hp -= self.attack
                 ret = True
         return ret

@@ -11,6 +11,7 @@ class Stage:
         self.players = []
         self.images = []
         self.frame = 0
+        self.draw = None
     def register_players(self, first_player, second_player):
         first_player.stage = self
         second_player.stage = self
@@ -18,15 +19,13 @@ class Stage:
         self.second_player = second_player
         self.players = [first_player, second_player]
     def characters_move(self):
-        for p in range(2):
-            for i in range(stg.NUM_CHARACTER):
-                ch = self.players[p].characters[i]
+        for p in self.players:
+            for ch in p.characters:
                 ch.successively_fires()
                 ch.actually_moves()
     def bullets_move(self):
-        for p in range(2):
-            for i in range(stg.NUM_CHARACTER):
-                ch = self.players[p].characters[i]
+        for p in self.players:
+            for ch in p.characters:
                 bul_index = 0
                 while(bul_index != len(ch.bullets)):
                     if(ch.bullets[bul_index].move()):
@@ -34,41 +33,40 @@ class Stage:
                     else:
                         del ch.bullets[bul_index]
     def characters_respawn(self):
-        for p in range(2):
-            for i in range(stg.NUM_CHARACTER):
-                ch = self.players[p].characters[i]
+        for p in self.players:
+            for ch in p.characters:
                 if(ch.hp<=0):
-                    ch.player.opponent().kill += 1
+                    p.opponent().kill += 1
                     ch.respawns()
     def opponent_player(self, player):
         return self.first_player if player == self.second_player else self.second_player
     def draw_field(self):
         im = Image.new('RGB', (stg.WIDTH, stg.HEIGHT), stg.color_background)
-        draw = ImageDraw.Draw(im)
-        for i in range(len(self.obstacles)):
-            obs = self.obstacles[i]
-            draw.rectangle((obs.x1, obs.y1, obs.x2, obs.y2),\
+        self.draw = ImageDraw.Draw(im)
+        for obs in self.obstacles:
+            self.draw.rectangle((obs.x1, obs.y1, obs.x2, obs.y2),\
                 fill=obs.color, outline=stg.color_outline)
-        for p in range(2):
-            for i in range(stg.NUM_CHARACTER):
-                ch = self.players[p].characters[i]
-                for j in range(len(ch.bullets)):
-                    bul = ch.bullets[j]
-                    draw.ellipse((bul.x-ch.bullet_radius, bul.y-ch.bullet_radius,\
+        for p in self.players:
+            for ch in p.characters:
+                for bul in ch.bullets:
+                    self.draw.ellipse((bul.x-ch.bullet_radius, bul.y-ch.bullet_radius,\
                         bul.x+ch.bullet_radius, bul.y+ch.bullet_radius),
                         fill=bul.character.color)
-        for p in range(2):
-            for i in range(stg.NUM_CHARACTER):
-                ch = self.players[p].characters[i]
-                draw.ellipse((ch.x-stg.CHARACTER_RADIUS, ch.y-stg.CHARACTER_RADIUS,\
-                    ch.x+stg.CHARACTER_RADIUS, ch.y+stg.CHARACTER_RADIUS),
-                    fill=ch.color, outline=self.players[p].color, width=3)
+        for p in self.players:
+            for ch in p.characters:
+                if ch.status=="lethal":
+                    self.draw.ellipse((ch.x-ch.radius, ch.y-ch.radius,\
+                        ch.x+ch.radius, ch.y+ch.radius),
+                        fill=ch.lethal_color, outline=p.color, width=3)
+                else:
+                    self.draw.ellipse((ch.x-ch.radius, ch.y-ch.radius,\
+                        ch.x+ch.radius, ch.y+ch.radius),
+                        fill=ch.color, outline=p.color, width=3)
         font=ImageFont.truetype('/System/Library/Fonts/ヒラギノ角ゴシック W4.ttc', 32)
-        draw.text((0, 32+3), "frame: {:0=3}".format(self.frame), fill=(0, 0, 0), font=font)
-        for p in range(2):
-            pl = self.players[p]
-            draw.text((p*stg.WIDTH/2, 0), "{}: {}".format(pl.name, pl.kill),\
-                fill=pl.color, font=font)
+        self.draw.text((0, 32+3), "frame: {:0=3}".format(self.frame), fill=(0, 0, 0), font=font)
+        for p in self.players:
+            self.draw.text((p.index*stg.WIDTH/2, 0), "{}: {}".format(p.name, p.kill),\
+                fill=p.color, font=font)
         self.images.append(im)
     def outputs(self):
         self.images[0].save('crawl_stars/outputs/crawl_stars.gif', save_all=True, append_images=self.images[1:],

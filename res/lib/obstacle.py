@@ -46,7 +46,7 @@ class Wall(Obstacle):
 class Pond(Obstacle):
     def __init__(self, x1, y1, x2, y2):
         super().__init__(x1, y1, x2, y2)
-        self.color = (100, 100, 256)
+        self.color = (0, 255, 255)
 
 # mathematically useful functions
 def set_up_equation(v1, v2):
