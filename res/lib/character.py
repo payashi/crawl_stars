@@ -110,9 +110,9 @@ class Character:
                     vx1, vy1 = obs.ith_virtual_vertex(i)
                     vx2, vy2 = obs.ith_virtual_vertex(i+1)
                     if(i%2==0):
-                        cx, cy = obstacle.horizontal_collision_check(x1, y1, x2, y2, vx1, vx2, vy1)
+                        cx, cy = obstacle.collision_check(self, x2, y2, vx1, vx2, vy1, True)
                     else:
-                        cx, cy = obstacle.vertical_collision_check(x1, y1, x2, y2, vy1, vy2, vx1)
+                        cx, cy = obstacle.collision_check(self, x2, y2, vy1, vy2, vx1, False)
                     if(cx!=None):
                         dis = utility.distance_between((x1, y1), (cx, cy))
                         if(dis<min_dis):
@@ -120,7 +120,7 @@ class Character:
                             ret = (cx, cy)
                 continue
             # else
-            col, dis = obs.collision_between(x1, y1, x2, y2)
+            col, dis = obs.collision_between(self, x2, y2)
             index = -1
             text_col = []
             if(min_dis>dis):
@@ -175,11 +175,11 @@ class Character:
                         if right_dis<left_dis:
                             index += 3
                             next_edge = obs.ith_virtual_vertex(index+3)
-                            if obs.collision_between(x1, y1, next_edge[0], next_edge[1])[0]==[]:
+                            if obs.collision_between(self, next_edge[0], next_edge[1])[0]==[]:
                                 index += 3
                         else:
                             next_edge = obs.ith_virtual_vertex(index+1)
-                            if obs.collision_between(x1, y1, next_edge[0], next_edge[1])[0]==[]:
+                            if obs.collision_between(self, next_edge[0], next_edge[1])[0]==[]:
                                 index += 1
                     elif(1 in col and 3 in col):
                         vv = []
@@ -203,11 +203,11 @@ class Character:
                         if right_dis<left_dis:
                             index += 3
                             next_x, next_y = obs.ith_virtual_vertex(index+3)
-                            if obs.collision_between(x1, y1, next_x, next_y)[0]==[]:
+                            if obs.collision_between(self, next_x, next_y)[0]==[]:
                                 index += 3
                         else:
                             next_x, next_y = obs.ith_virtual_vertex(index+1)
-                            if obs.collision_between(x1, y1, next_x, next_y)[0]==[]:
+                            if obs.collision_between(self, next_x, next_y)[0]==[]:
                                 index += 1
                     elif(col==[0, 1]):
                         index = 1
@@ -230,22 +230,22 @@ class Character:
                         if right:
                             index += 3
                             next_x, next_y = obs.ith_virtual_vertex(index+3)
-                            if obs.collision_between(x1, y1, next_x, next_y)[0]==[]:
+                            if obs.collision_between(self, next_x, next_y)[0]==[]:
                                 index += 3
                         else:
                             next_x, next_y = obs.ith_virtual_vertex(index+1)
-                            if obs.collision_between(x1, y1, next_x, next_y)[0]==[]:
+                            if obs.collision_between(self, next_x, next_y)[0]==[]:
                                 index += 1
                     elif(1 in col and 3 in col):
                         index = 0 if plus_x else 2
                         if right:
                             index += 3
                             next_x, next_y = obs.ith_virtual_vertex(index+3)
-                            if obs.collision_between(x1, y1, next_x, next_y)[0]==[]:
+                            if obs.collision_between(self, next_x, next_y)[0]==[]:
                                 index += 3
                         else:
                             next_x, next_y = obs.ith_virtual_vertex(index+1)
-                            if obs.collision_between(x1, y1, next_x, next_y)[0]==[]:
+                            if obs.collision_between(self, next_x, next_y)[0]==[]:
                                 index += 1
                     elif(col==[0, 1]):
                         index = 1 if plus_x else 2
