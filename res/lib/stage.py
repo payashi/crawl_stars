@@ -18,26 +18,6 @@ class Stage:
         self.first_player = first_player
         self.second_player = second_player
         self.players = [first_player, second_player]
-    def characters_move(self):
-        for p in self.players:
-            for ch in p.characters:
-                ch.successively_fires()
-                ch.actually_moves()
-    def bullets_move(self):
-        for p in self.players:
-            for ch in p.characters:
-                bul_index = 0
-                while(bul_index != len(ch.bullets)):
-                    if(ch.bullets[bul_index].move()):
-                        bul_index += 1
-                    else:
-                        del ch.bullets[bul_index]
-    def characters_respawn(self):
-        for p in self.players:
-            for ch in p.characters:
-                if(ch.hp<=0):
-                    p.opponent().kill += 1
-                    ch.respawns()
     def opponent_player(self, player):
         return self.first_player if player == self.second_player else self.second_player
     def draw_field(self):
@@ -68,7 +48,7 @@ class Stage:
             self.draw.text((p.index*stg.WIDTH/2, 0), "{}: {}".format(p.name, p.kill),\
                 fill=p.color, font=font)
         self.images.append(im)
-    def outputs(self):
+    def output(self):
         self.images[0].save('crawl_stars/outputs/crawl_stars.gif', save_all=True, append_images=self.images[1:],
                 optimize=False, duration=40)
 class SimpleStage(Stage):

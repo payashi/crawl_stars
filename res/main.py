@@ -18,19 +18,17 @@ def main():
         sys.stdout.write("\rframe: {:0=3} / {} frame".format(st.frame, stg.MAX_FRAME))
         sys.stdout.flush()
         time.sleep(0.01)
-        for p in st.players:
-            for ch in p.characters:
-                ch.passively_changes()
+        lib.Character.passive_change(st)
         hayashi_moves(st.players[0])
         hayashi_moves(st.players[1])
-        st.bullets_move()
-        st.characters_move()
-        st.characters_respawn()
+        lib.Bullet.all_move(st)
+        lib.Character.all_move(st)
+        lib.Character.respawn_check(st)
         if(st.frame%int(round(1/stg.DT))==0): st.draw_field()
         # st.draw_field()
         st.frame += 1
     sys.stdout.write("\nnow drawing...")
-    st.outputs()
+    st.output()
     sys.stdout.write("\033[2K\033[G")
     sys.stdout.write("finished!!\n")
 
@@ -43,16 +41,16 @@ def hayashi_moves(player): # 0th player
             # ch.attack("lethal")
             if(ch.status=="lethal"):
                 pass
-            elif(ch.valid_lethal_attack(tmp.x, tmp.y)):
-                ch.lethal_attack(tmp.x, tmp.y)
+            elif(ch.valid_lethal_blow(tmp.x, tmp.y)):
+                ch.lethal_blow(tmp.x, tmp.y)
             else:
                 ch.move_toward(ch.detour_toward(ch.x, ch.y, tmp.x, tmp.y, True, False))
-                ch.fires(tmp.x, tmp.y)
+                ch.fire(tmp.x, tmp.y)
         else:
             ch.move_toward(ch.detour_toward(ch.x, ch.y, tmp.x, tmp.y, True, False))
-            ch.fires(tmp.x, tmp.y)
+            ch.fire(tmp.x, tmp.y)
         # ch.move_toward(ch.detour_toward(ch.x, ch.y, tmp.x, tmp.y, True, False))
-        # ch.fires(tmp.x, tmp.y)
+        # ch.fire(tmp.x, tmp.y)
 def matope_moves(player): # 1st player
     enemy = player.stage.players[(player.index+1)%2]
     for ch in player.characters:
@@ -61,13 +59,13 @@ def matope_moves(player): # 1st player
         if(ch.__class__.__name__=="Kimura"):
             if(ch.status=="lethal"):
                 pass
-            elif(ch.valid_lethal_attack(tmp.x, tmp.y)):
-                ch.lethal_attack(tmp.x, tmp.y)
+            elif(ch.valid_lethal_blow(tmp.x, tmp.y)):
+                ch.lethal_blow(tmp.x, tmp.y)
             else:
                 ch.move_toward(ch.detour_toward(ch.x, ch.y, tmp.x, tmp.y, True, False))
-                ch.fires(tmp.x, tmp.y)
+                ch.fire(tmp.x, tmp.y)
         else:
             ch.move_toward(ch.detour_toward(ch.x, ch.y, tmp.x, tmp.y, True, False))
-            ch.fires(tmp.x, tmp.y)
+            ch.fire(tmp.x, tmp.y)
 
 main()

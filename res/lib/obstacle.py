@@ -7,7 +7,7 @@ class Obstacle:
         self.y1 = y1
         self.x2 = x2
         self.y2 = y2
-    def collides_between(self, x1, y1, x2, y2):
+    def collision_between(self, x1, y1, x2, y2):
         min_dis = stg.INF
         col = []
         for i in range(4):

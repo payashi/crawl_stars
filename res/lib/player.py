@@ -27,4 +27,4 @@ class Player:
                 elif((stg.NUM_CHARACTER-1-i)%3==1): self.characters.append(character.Sakaguchi(x, y, self, i))
                 elif((stg.NUM_CHARACTER-1-i)%3==2): self.characters.append(character.Miura(x, y, self, i))
     def opponent(self):
-        return self.stage.opponent_player(self)
+        return self.stage.first_player if self == self.stage.second_player else self.stage.second_player

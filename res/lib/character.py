@@ -35,7 +35,26 @@ class Character:
         self.lethal_color = (255, 255, 0)
         self.status = "normal"
         self.lethal_gauge_speed =  0.03
-    def moves_toward(self, dest):
+    def all_move(stage):
+        for p in stage.players:
+            for ch in p.characters:
+                ch.successive_fire()
+                ch.actual_move()
+    def respawn_check(stage):
+        for p in stage.players:
+            for ch in p.characters:
+                if(ch.hp<=0):
+                    p.opponent().kill += 1
+                    ch.x = ch.respawn_x
+                    ch.y = ch.respawn_y
+                    ch.hp = ch.max_hp
+                    ch.gauge = 3
+                    ch.to_x = ch.x
+                    ch.to_y = ch.y
+                    ch.frame = 0
+                    ch.status = "normal"
+                    ch.last_attack_frame = None
+    def move_toward(self, dest):
         dis = utility.distance_between((self.x, self.y), dest)
         if(dis<=self.speed*stg.DT):
             self.to_x = dest[0]
@@ -43,26 +62,28 @@ class Character:
         else:
             self.to_x = self.x+(self.speed*stg.DT/dis)*(dest[0]-self.x)
             self.to_y = self.y+(self.speed*stg.DT/dis)*(dest[1]-self.y)
-    def actually_moves(self):
+    def actual_move(self):
         self.x = self.to_x
         self.y = self.to_y
-    def passively_changes(self):
-        self.frame += 1
-        self.gauge += self.gauge_speed*stg.DT
-        if(self.gauge>3): self.gauge=3
-        if(self.gauge>=2):
-            self.hp += self.hp_speed*stg.DT
-        if(self.hp>self.max_hp): self.hp=self.max_hp
-        self.lethal_gauge += self.lethal_gauge_speed*stg.DT
-        if(self.lethal_gauge>1): self.lethal_gauge=1
-        if(self.status=="successive" and self.last_attack_frame+self.attack_interval_frame*self.max_succession<=self.frame):
-            self.status = "normal"
-    def successively_fires(self):
+    def passive_change(stage):
+        for p in stage.players:
+            for ch in p.characters:
+                ch.frame += 1
+                ch.gauge += ch.gauge_speed*stg.DT
+                if(ch.gauge>3): ch.gauge=3
+                if(ch.gauge>=2):
+                    ch.hp += ch.hp_speed*stg.DT
+                if(ch.hp>ch.max_hp): ch.hp=ch.max_hp
+                ch.lethal_gauge += ch.lethal_gauge_speed*stg.DT
+                if(ch.lethal_gauge>1): ch.lethal_gauge=1
+                if(ch.status=="successive" and ch.last_attack_frame+ch.attack_interval_frame*ch.max_succession<=ch.frame):
+                    ch.status = "normal"
+    def successive_fire(self):
         if(self.status=="successive" and self.last_attack_frame!=self.frame):
             after_fire = self.last_attack_frame+self.attack_interval_frame*self.max_succession - self.frame
             if(after_fire%self.attack_interval_frame==0):
                 self.bullets.append(bullet.Bullet(self.x, self.y, self.x+self.bullet_to_x, self.y+self.bullet_to_y, self))
-    def fires(self, gx, gy):
+    def fire(self, gx, gy):
         if(self.status in ["lethal", "successive"]): return False
         if(self.gauge<1): return False
         self.gauge -= 1
@@ -76,16 +97,6 @@ class Character:
             self.bullet_to_x = (gx-self.x)/dis
             self.bullet_to_y = (gy-self.y)/dis
         return True
-    def respawns(self):
-        self.x = self.respawn_x
-        self.y = self.respawn_y
-        self.hp = self.max_hp
-        self.gauge = 3
-        self.to_x = self.x
-        self.to_y = self.y
-        self.frame = 0
-        self.status = "normal"
-        self.last_attack_frame = None
     def detour_toward(self, x1, y1, x2, y2, shorter=True, right=True):
         if(abs(x1-x2)+abs(y1-y2)==0): return (x2, y2)
         min_dis = stg.INF
@@ -109,7 +120,7 @@ class Character:
                             ret = (cx, cy)
                 continue
             # else
-            col, dis = obs.collides_between(x1, y1, x2, y2)
+            col, dis = obs.collision_between(x1, y1, x2, y2)
             index = -1
             text_col = []
             if(min_dis>dis):
@@ -164,11 +175,11 @@ class Character:
                         if right_dis<left_dis:
                             index += 3
                             next_edge = obs.ith_virtual_vertex(index+3)
-                            if obs.collides_between(x1, y1, next_edge[0], next_edge[1])[0]==[]:
+                            if obs.collision_between(x1, y1, next_edge[0], next_edge[1])[0]==[]:
                                 index += 3
                         else:
                             next_edge = obs.ith_virtual_vertex(index+1)
-                            if obs.collides_between(x1, y1, next_edge[0], next_edge[1])[0]==[]:
+                            if obs.collision_between(x1, y1, next_edge[0], next_edge[1])[0]==[]:
                                 index += 1
                     elif(1 in col and 3 in col):
                         vv = []
@@ -192,11 +203,11 @@ class Character:
                         if right_dis<left_dis:
                             index += 3
                             next_x, next_y = obs.ith_virtual_vertex(index+3)
-                            if obs.collides_between(x1, y1, next_x, next_y)[0]==[]:
+                            if obs.collision_between(x1, y1, next_x, next_y)[0]==[]:
                                 index += 3
                         else:
                             next_x, next_y = obs.ith_virtual_vertex(index+1)
-                            if obs.collides_between(x1, y1, next_x, next_y)[0]==[]:
+                            if obs.collision_between(x1, y1, next_x, next_y)[0]==[]:
                                 index += 1
                     elif(col==[0, 1]):
                         index = 1
@@ -219,22 +230,22 @@ class Character:
                         if right:
                             index += 3
                             next_x, next_y = obs.ith_virtual_vertex(index+3)
-                            if obs.collides_between(x1, y1, next_x, next_y)[0]==[]:
+                            if obs.collision_between(x1, y1, next_x, next_y)[0]==[]:
                                 index += 3
                         else:
                             next_x, next_y = obs.ith_virtual_vertex(index+1)
-                            if obs.collides_between(x1, y1, next_x, next_y)[0]==[]:
+                            if obs.collision_between(x1, y1, next_x, next_y)[0]==[]:
                                 index += 1
                     elif(1 in col and 3 in col):
                         index = 0 if plus_x else 2
                         if right:
                             index += 3
                             next_x, next_y = obs.ith_virtual_vertex(index+3)
-                            if obs.collides_between(x1, y1, next_x, next_y)[0]==[]:
+                            if obs.collision_between(x1, y1, next_x, next_y)[0]==[]:
                                 index += 3
                         else:
                             next_x, next_y = obs.ith_virtual_vertex(index+1)
-                            if obs.collides_between(x1, y1, next_x, next_y)[0]==[]:
+                            if obs.collision_between(x1, y1, next_x, next_y)[0]==[]:
                                 index += 1
                     elif(col==[0, 1]):
                         index = 1 if plus_x else 2
@@ -282,13 +293,13 @@ class Kimura(Character):
         self.lethal_speed = 5
         self.lethal_damage = 4000
         self.lethal_dest = (None, None)
-    def lethal_attack(self, x, y): # kimura press
-        if(not self.valid_lethal_attack(x, y)): return
+    def lethal_blow(self, x, y): # kimura press
+        if(not self.valid_lethal_blow(x, y)): return
         self.lethal_gauge = 0
         self.status = "lethal"
         self.last_attack_frame = None
         self.lethal_dest = (x, y)
-    def valid_lethal_attack(self, x, y):
+    def valid_lethal_blow(self, x, y):
         if(self.lethal_gauge<1): return False
         dis = utility.distance_between((self.x, self.y), (x, y))
         if(dis>self.kimura_press_jump_range): return False
@@ -297,22 +308,20 @@ class Kimura(Character):
             and obs.y1-self.radius<y and y<obs.y2+self.radius):
                 return False
         return True
-    def lethal_move(self):
-        dis = utility.distance_between((self.x, self.y), self.lethal_dest)
-        if(dis<=self.lethal_speed*stg.DT):
-            self.to_x,  self.to_y  = self.lethal_dest
-            self.status = "normal"
-            self.lethal_gauge = 0
-            for ch in self.player.opponent().characters:
-                d = utility.distance_between(self.lethal_dest, (ch.x, ch.y))
-                if(d<=self.kimura_press_attack_range and ch.frame > int(round(50/stg.DT))):
-                    ch.hp -= self.lethal_damage
-        else:
-            self.to_x = self.x+(self.lethal_speed*stg.DT/dis)*(self.lethal_dest[0]-self.x)
-            self.to_y = self.y+(self.lethal_speed*stg.DT/dis)*(self.lethal_dest[1]-self.y)
-    def actually_moves(self):
+    def actual_move(self):
         if(self.status=="lethal"):
-            self.lethal_move()
+            dis = utility.distance_between((self.x, self.y), self.lethal_dest)
+            if(dis<=self.lethal_speed*stg.DT):
+                self.to_x,  self.to_y  = self.lethal_dest
+                self.status = "normal"
+                self.lethal_gauge = 0
+                for ch in self.player.opponent().characters:
+                    d = utility.distance_between(self.lethal_dest, (ch.x, ch.y))
+                    if(d<=self.kimura_press_attack_range and ch.frame > int(round(50/stg.DT))):
+                        ch.hp -= self.lethal_damage
+            else:
+                self.to_x = self.x+(self.lethal_speed*stg.DT/dis)*(self.lethal_dest[0]-self.x)
+                self.to_y = self.y+(self.lethal_speed*stg.DT/dis)*(self.lethal_dest[1]-self.y)
         self.x = self.to_x
         self.y = self.to_y
 class Sakaguchi(Character):
