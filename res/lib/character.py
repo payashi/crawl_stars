@@ -35,7 +35,7 @@ class Character:
         self.lethal_color = (255, 255, 0)
         self.status = "normal"
         self.lethal_gauge_speed =  0.03
-    def move_toward(self, dest):
+    def moves_toward(self, dest):
         dis = utility.distance_between((self.x, self.y), dest)
         if(dis<=self.speed*stg.DT):
             self.to_x = dest[0]

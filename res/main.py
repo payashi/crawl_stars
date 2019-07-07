@@ -40,6 +40,7 @@ def hayashi_moves(player): # 0th player
     for ch in player.characters:
         tmp = enemy.characters[stg.NUM_CHARACTER-1-ch.index]
         if(ch.__class__.__name__=="Kimura"):
+            # ch.attack("lethal")
             if(ch.status=="lethal"):
                 pass
             elif(ch.valid_lethal_attack(tmp.x, tmp.y)):
