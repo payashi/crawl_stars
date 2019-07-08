@@ -12,6 +12,7 @@ class Stage:
         self.images = []
         self.frame = 0
         self.draw = None
+        self.im = None
     def register_players(self, first_player, second_player):
         first_player.stage = self
         second_player.stage = self
@@ -20,12 +21,13 @@ class Stage:
         self.players = [first_player, second_player]
     def opponent_player(self, player):
         return self.first_player if player == self.second_player else self.second_player
-    def draw_field(self):
-        im = Image.new('RGB', (stg.WIDTH, stg.HEIGHT), stg.color_background)
-        self.draw = ImageDraw.Draw(im)
+    def pre_draw(self):
+        self.im = Image.new('RGB', (stg.WIDTH, stg.HEIGHT), stg.color_background)
+        self.draw = ImageDraw.Draw(self.im)
         for obs in self.obstacles:
             self.draw.rectangle((obs.x1, obs.y1, obs.x2, obs.y2),\
                 fill=obs.color, outline=stg.color_outline)
+    def draw_field(self):
         for p in self.players:
             for ch in p.characters:
                 for bul in ch.bullets:
@@ -47,7 +49,7 @@ class Stage:
         for p in self.players:
             self.draw.text((p.index*stg.WIDTH/2, 0), "{}: {}".format(p.name, p.kill),\
                 fill=p.color, font=font)
-        self.images.append(im)
+        self.images.append(self.im)
     def output(self):
         self.images[0].save('crawl_stars/outputs/crawl_stars.gif', save_all=True, append_images=self.images[1:],
                 optimize=False, duration=40)
