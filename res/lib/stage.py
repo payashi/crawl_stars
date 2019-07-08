@@ -58,7 +58,7 @@ class SimpleStage(Stage):
         super().__init__()
         self.name = "Simple Stage"
         self.obstacles = []
-        self.obstacles.append(obstacle.Pond(stg.WIDTH*0.1, stg.HEIGHT*0.2, stg.WIDTH*0.6, stg.HEIGHT*0.25))
-        self.obstacles.append(obstacle.Wall(stg.WIDTH*0.4, stg.HEIGHT*0.35, stg.WIDTH*0.9, stg.HEIGHT*0.4))
-        self.obstacles.append(obstacle.Wall(stg.WIDTH*0.1, stg.HEIGHT*0.6, stg.WIDTH*0.6, stg.HEIGHT*0.65))
-        self.obstacles.append(obstacle.Pond(stg.WIDTH*0.4, stg.HEIGHT*0.75, stg.WIDTH*0.9, stg.HEIGHT*0.8))
+        self.obstacles.append(obstacle.Wall(stg.WIDTH*0.1, stg.HEIGHT*0.2, stg.WIDTH*0.6, stg.HEIGHT*0.25))
+        self.obstacles.append(obstacle.Pond(stg.WIDTH*0.4, stg.HEIGHT*0.35, stg.WIDTH*0.9, stg.HEIGHT*0.4))
+        self.obstacles.append(obstacle.Pond(stg.WIDTH*0.1, stg.HEIGHT*0.6, stg.WIDTH*0.6, stg.HEIGHT*0.65))
+        self.obstacles.append(obstacle.Wall(stg.WIDTH*0.4, stg.HEIGHT*0.75, stg.WIDTH*0.9, stg.HEIGHT*0.8))

@@ -379,18 +379,20 @@ class Miura(Character):
         self.lethal_damage = 4000
         self.lethal_gauge_speed = 0.01
     def trigger_lethal_blow(self, x, y): # great kick
+        k = self.great_kick_range/utility.distance_between((self.x, self.y), (x, y))
+        x, y = (self.x+k*(x-self.x), self.y+k*(y-self.y))
         if(not self.valid_lethal_blow(x, y)): return
         self.lethal_gauge = 0
         self.status = "lethal"
         self.last_attack_frame = None
         self.latest_lethal_frame = self.frame
-        k = self.great_kick_range/utility.distance_between((self.x, self.y), (x, y))
-        self.lethal_dest = (self.x+k*(x-self.x), self.y+k*(y-self.y))
+        self.lethal_dest = (x, y)
     def valid_lethal_blow(self, x, y):
         if(self.lethal_gauge<1): return False
         dis = utility.distance_between((self.x, self.y), (x, y))
         if(dis<stg.MICRO): return False
         for obs in self.player.stage.obstacles:
+            if(obs.__class__.__name__=="Pond"): continue
             for i in range(4):
                 vx1, vy1 = obs.ith_vertex(i)
                 vx2, vy2 = obs.ith_vertex(i+1)
@@ -411,7 +413,7 @@ class Miura(Character):
         self.player.stage.draw.line((self.x, self.y)+self.lethal_dest,
         fill=self.lethal_color, width=self.radius*2)
         for ch in self.player.opponent().characters:
-            dis = utility.distance_between((self.x, self.y), self.lethal_dest)
+            dis = utility.distance_between((self.x, self.y), (ch.x, ch.y))
             if(dis>self.great_kick_range): continue
             if(k==stg.INF):
                 if(abs(ch.x-self.x)<=self.radius+ch.radius and (self.lethal_dest[1]-self.y)*(ch.y-self.y)>=0):
