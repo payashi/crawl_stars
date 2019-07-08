@@ -10,7 +10,7 @@ class Character:
         self.max_hp = stg.MAX_HP
         self.hp = self.max_hp
         self.hp_speed = stg.HP_SPEED
-        self.speed = 3
+        self.speed = 3/stg.SCALE
         self.gauge = 3
         self.gauge_speed = 0.05
         self.x = x
@@ -30,7 +30,7 @@ class Character:
         self.bullet_attack_interval_second = 2
         self.attack_interval_frame = int(round(self.bullet_attack_interval_second/stg.DT))
         self.lethal_gauge = 1
-        self.radius = 15
+        self.radius = 15/stg.SCALE
         self.lethal_color = (255, 255, 0)
         self.status = "normal"
         self.lethal_gauge_speed =  0.03
@@ -88,7 +88,7 @@ class Character:
         if(self.hp>self.max_hp): self.hp=self.max_hp
         self.lethal_gauge += self.lethal_gauge_speed*stg.DT
         if(self.lethal_gauge>1): self.lethal_gauge=1
-        if(self.status=="successive" and self.last_attack_frame+self.attack_interval_frame*self.max_succession<=self.frame):
+        if(self.status=="successive" and int(round(self.last_attack_frame+self.attack_interval_frame*self.max_succession))<=int(round(self.frame))):
             self.status = "normal"
     def successive_fire(self):
         if(self.status=="successive" and self.last_attack_frame!=self.frame):
@@ -298,19 +298,19 @@ class Kimura(Character):
         self.lethal_color = (255, 255, 0)
         self.hp = 6000
         self.hp_speed = 500
-        self.speed = 2.5
+        self.speed = 2.5/stg.SCALE
         self.gauge_speed = 0.11*0.3
         self.bullet_damage = 1000
-        self.bullet_radius = 3
+        self.bullet_radius = 3/stg.SCALE
         self.bullet_duration = 35
         self.max_succession = 2
         self.bullet_attack_interval_second = 0.5 # it should be DT*n (n is integer)
-        self.kimura_press_jump_range = 180
-        self.kimura_press_attack_range = self.radius*1.8
-        self.lethal_speed = 10
+        self.kimura_press_jump_range = 180/stg.SCALE
+        self.kimura_press_attack_range = self.radius*1/stg.SCALE
+        self.lethal_speed = 10/stg.SCALE
         self.lethal_damage = 4000
         self.lethal_dest = (None, None)
-        self.radius = 15
+        self.lethal_end = False
     def trigger_lethal_blow(self, x, y): # kimura press
         if(not self.valid_lethal_blow(x, y)): return
         self.lethal_gauge = 0
@@ -338,12 +338,26 @@ class Kimura(Character):
     def lethal_blow(self):
         dis = utility.distance_between((self.x, self.y), self.lethal_dest)
         if(dis<=stg.MICRO):
-            self.status = "normal"
+            self.lethal_end = True
             self.lethal_gauge = 0
             for ch in self.player.opponent().characters:
                 d = utility.distance_between(self.lethal_dest, (ch.x, ch.y))
                 if(d<=self.kimura_press_attack_range):
                     Character.damage_to(ch, self.lethal_damage)
+    def passive_change(self):
+        if(self.lethal_end):
+            self.status="normal"
+            self.lethal_end = False
+        self.frame += 1
+        self.gauge += self.gauge_speed*stg.DT
+        if(self.gauge>3): self.gauge=3
+        if(self.gauge>=2):
+            self.hp += self.hp_speed*stg.DT
+        if(self.hp>self.max_hp): self.hp=self.max_hp
+        self.lethal_gauge += self.lethal_gauge_speed*stg.DT
+        if(self.lethal_gauge>1): self.lethal_gauge=1
+        if(self.status=="successive" and int(round(self.last_attack_frame+self.attack_interval_frame*self.max_succession))<=int(round(self.frame))):
+            self.status = "normal"
 class Sakaguchi(Character):
     def __init__(self, x, y, player, character):
         super().__init__(x, y, player, character)
@@ -351,13 +365,52 @@ class Sakaguchi(Character):
         # self.lethal_color = (255, 0, 255)
         self.hp = 3000
         self.hp_speed = 500
-        self.speed = 3.5
+        self.speed = 3.5/stg.SCALE
         self.gauge_speed = 0.11*0.3
         self.bullet_damage = 600
-        self.bullet_radius = 2
+        self.bullet_radius = 2/stg.SCALE
         self.bullet_duration = 85
         self.max_succession = 4
         self.bullet_attack_interval_second = 0.5
+        self.mad_movement_range = 60/stg.SCALE
+        self.mad_movement_duration = 30
+        self.lethal_damage = 4000
+        self.latest_lethal_frame = None
+        self.mad_movement_color = (255,240,245)
+    def trigger_lethal_blow(self, x, y):
+        if(not self.valid_lethal_blow(x, y)): return
+        self.lethal_gauge = 0
+        self.status = "lethal"
+        self.last_attack_frame = None
+        self.latest_lethal_frame = self.frame
+    def valid_lethal_blow(self, x, y):
+        if(self.lethal_gauge<1): return False
+        return True
+    def lethal_blow(self):
+        self.player.stage.draw.ellipse(utility.scaling((self.x-self.mad_movement_range, self.y-self.mad_movement_range,\
+            self.x+self.mad_movement_range, self.y+self.mad_movement_range), stg.SCALE),
+            fill=self.mad_movement_color)
+        for ch in self.player.opponent().characters:
+            dis = utility.distance_between((self.x, self.y), (ch.x, ch.y))
+            if(dis<=self.mad_movement_range):
+                Character.damage_to(ch, self.lethal_damage)
+    def passive_change(self):
+        self.frame += 1
+        self.gauge += self.gauge_speed*stg.DT
+        if(self.gauge>3): self.gauge=3
+        if(self.gauge>=2):
+            self.hp += self.hp_speed*stg.DT
+        if(self.hp>self.max_hp): self.hp=self.max_hp
+        self.lethal_gauge += self.lethal_gauge_speed*stg.DT
+        if(self.lethal_gauge>1): self.lethal_gauge=1
+        if(self.status=="successive" and int(round(self.last_attack_frame+self.attack_interval_frame*self.max_succession))<=int(round(self.frame))):
+            self.status = "normal"
+        if(self.status=="lethal" and int(round(self.frame))>=int(round(self.latest_lethal_frame+(self.mad_movement_duration/stg.DT)))):
+            self.status = "normal"
+            self.lethal_gauge = 0
+    def lethal_move(self):
+            self.x = self.to_x
+            self.y = self.to_y
 
 class Miura(Character):
     def __init__(self, x, y, player, character):
@@ -365,15 +418,15 @@ class Miura(Character):
         self.color = (0, 0, 0)
         self.hp = 4500
         self.hp_speed = 500
-        self.speed = 3
+        self.speed = 3/stg.SCALE
         self.gauge_speed = 0.09*0.3
         self.bullet_damage = 2800
-        self.bullet_radius = 4
+        self.bullet_radius = 6/stg.SCALE
         self.bullet_duration = 60
         self.max_succession = 1
         self.bullet_attack_interval_second = 0.5
         self.great_kick_duration = 10
-        self.great_kick_range = 300
+        self.great_kick_range = 300/stg.SCALE
         self.latest_lethal_frame = None
         self.lethal_dest = (None, None)
         self.lethal_damage = 4000
@@ -410,19 +463,19 @@ class Miura(Character):
         self.y = self.to_y
     def lethal_blow(self):
         k, b = obstacle.set_up_equation((self.x, self.y), self.lethal_dest)
-        self.player.stage.draw.line((self.x, self.y)+self.lethal_dest,
-        fill=self.lethal_color, width=self.radius*2)
+        self.player.stage.draw.line(utility.scaling((self.x, self.y)+self.lethal_dest, stg.SCALE),
+        fill=self.lethal_color, width=int(round(self.radius*2*stg.SCALE)))
         for ch in self.player.opponent().characters:
             dis = utility.distance_between((self.x, self.y), (ch.x, ch.y))
             if(dis>self.great_kick_range): continue
             if(k==stg.INF):
                 if(abs(ch.x-self.x)<=self.radius+ch.radius and (self.lethal_dest[1]-self.y)*(ch.y-self.y)>=0):
-                    Character.damage_to(ch, self.lethal_damage)
+                    Character.damage_to(ch, self.lethal_damage/self.great_kick_duration)
             else:
                 if(abs(k*ch.x+ch.y+b)<=self.radius*(k**2+1)**0.5 and \
                 ((-1/k)*(self.lethal_dest[0]-self.x)+(self.lethal_dest[1]-self.y)) * \
                 ((-1/k)*(ch.x-self.x)+(ch.y-self.y))>=0):
-                    Character.damage_to(ch, self.lethal_damage)
+                    Character.damage_to(ch, self.lethal_damage/self.great_kick_duration)
     def passive_change(self):
         self.frame += 1
         self.gauge += self.gauge_speed*stg.DT
@@ -432,8 +485,8 @@ class Miura(Character):
         if(self.hp>self.max_hp): self.hp=self.max_hp
         self.lethal_gauge += self.lethal_gauge_speed*stg.DT
         if(self.lethal_gauge>1): self.lethal_gauge=1
-        if(self.status=="successive" and self.last_attack_frame+self.attack_interval_frame*self.max_succession<=self.frame):
+        if(self.status=="successive" and int(round(self.last_attack_frame+self.attack_interval_frame*self.max_succession))<=int(round(self.frame))):
             self.status = "normal"
-        if(self.status=="lethal" and self.frame>=self.latest_lethal_frame+(self.great_kick_duration/stg.DT)):
+        if(self.status=="lethal" and int(round(self.frame))>=int(round(self.latest_lethal_frame+(self.great_kick_duration/stg.DT)))):
             self.status = "normal"
             self.lethal_gauge = 0

@@ -7,7 +7,7 @@ class Bullet:
         self.character = character
         self.x = x
         self.y = y
-        self.speed = 10
+        self.speed = 10/stg.SCALE
         self.attack = self.character.bullet_damage
         self.radius = self.character.bullet_radius
         dis = utility.distance_between((x, y), (gx, gy))
@@ -46,7 +46,7 @@ class Bullet:
                 return True
         ret = False
         for ch in self.character.player.opponent().characters:
-            if(utility.distance_between((ch.x, ch.y), (self.x, self.y))<=self.radius+ch.radius and \
+            if(utility.distance_between((ch.x, ch.y), (self.x, self.y))<self.radius+ch.radius and \
             character.Character.damage_to(ch, self.attack)):
                 ret = True
         return ret

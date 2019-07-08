@@ -3,6 +3,7 @@ from PIL import Image, ImageDraw, ImageFont
 import settings as stg
 from . import player
 from . import obstacle
+from . import utility
 
 class Stage:
     def __init__(self):
@@ -13,6 +14,7 @@ class Stage:
         self.frame = 0
         self.draw = None
         self.im = None
+        self.scale = stg.SCALE
     def register_players(self, first_player, second_player):
         first_player.stage = self
         second_player.stage = self
@@ -22,32 +24,32 @@ class Stage:
     def opponent_player(self, player):
         return self.first_player if player == self.second_player else self.second_player
     def pre_draw(self):
-        self.im = Image.new('RGB', (stg.WIDTH, stg.HEIGHT), stg.color_background)
+        self.im = Image.new('RGB', utility.scaling((stg.WIDTH, stg.HEIGHT), self.scale), stg.color_background)
         self.draw = ImageDraw.Draw(self.im)
         for obs in self.obstacles:
-            self.draw.rectangle((obs.x1, obs.y1, obs.x2, obs.y2),\
+            self.draw.rectangle(utility.scaling((obs.x1, obs.y1, obs.x2, obs.y2), self.scale),\
                 fill=obs.color, outline=stg.color_outline)
     def draw_field(self):
         for p in self.players:
             for ch in p.characters:
-                for bul in ch.bullets:
-                    self.draw.ellipse((bul.x-ch.bullet_radius, bul.y-ch.bullet_radius,\
-                        bul.x+ch.bullet_radius, bul.y+ch.bullet_radius),
-                        fill=bul.character.color)
-        for p in self.players:
-            for ch in p.characters:
                 if ch.status=="lethal":
-                    self.draw.ellipse((ch.x-ch.radius, ch.y-ch.radius,\
-                        ch.x+ch.radius, ch.y+ch.radius),
+                    self.draw.ellipse(utility.scaling((ch.x-ch.radius, ch.y-ch.radius,\
+                        ch.x+ch.radius, ch.y+ch.radius), self.scale),
                         fill=ch.lethal_color, outline=p.color, width=3)
                 else:
-                    self.draw.ellipse((ch.x-ch.radius, ch.y-ch.radius,\
-                        ch.x+ch.radius, ch.y+ch.radius),
+                    self.draw.ellipse(utility.scaling((ch.x-ch.radius, ch.y-ch.radius,\
+                        ch.x+ch.radius, ch.y+ch.radius), self.scale),
                         fill=ch.color, outline=p.color, width=3)
+        for p in self.players:
+            for ch in p.characters:
+                for bul in ch.bullets:
+                    self.draw.ellipse(utility.scaling((bul.x-ch.bullet_radius, bul.y-ch.bullet_radius,\
+                        bul.x+ch.bullet_radius, bul.y+ch.bullet_radius), self.scale),
+                        fill=bul.character.color)
         font=ImageFont.truetype('/System/Library/Fonts/ヒラギノ角ゴシック W4.ttc', 32)
         self.draw.text((0, 32+3), "frame: {:0=3}".format(self.frame), fill=(0, 0, 0), font=font)
         for p in self.players:
-            self.draw.text((p.index*stg.WIDTH/2, 0), "{}: {}".format(p.name, p.kill),\
+            self.draw.text((p.index*stg.WIDTH*stg.SCALE/2, 0), "{}: {}".format(p.name, p.kill),\
                 fill=p.color, font=font)
         self.images.append(self.im)
     def output(self):
