@@ -302,13 +302,13 @@ class Kimura(Character):
         self.gauge_speed = 0.11*0.3
         self.bullet_damage = 1000
         self.bullet_radius = 3/stg.SCALE
-        self.bullet_duration = 35
+        self.bullet_duration = 25
         self.max_succession = 2
         self.bullet_attack_interval_second = 0.5 # it should be DT*n (n is integer)
-        self.kimura_press_jump_range = 180/stg.SCALE
+        self.kimura_press_jump_range = 150/stg.SCALE
         self.kimura_press_attack_range = self.radius*1/stg.SCALE
         self.lethal_speed = 10/stg.SCALE
-        self.lethal_damage = 4000
+        self.lethal_damage = 2500
         self.lethal_dest = (None, None)
         self.lethal_end = False
     def trigger_lethal_blow(self, x, y): # kimura press
@@ -369,12 +369,12 @@ class Sakaguchi(Character):
         self.gauge_speed = 0.11*0.3
         self.bullet_damage = 600
         self.bullet_radius = 2/stg.SCALE
-        self.bullet_duration = 85
+        self.bullet_duration = 60
         self.max_succession = 4
         self.bullet_attack_interval_second = 0.5
-        self.mad_movement_range = 60/stg.SCALE
+        self.mad_movement_range = 150/stg.SCALE
         self.mad_movement_duration = 30
-        self.lethal_damage = 4000
+        self.lethal_damage = 6000
         self.latest_lethal_frame = None
         self.mad_movement_color = (255,240,245)
     def trigger_lethal_blow(self, x, y):
@@ -393,7 +393,7 @@ class Sakaguchi(Character):
         for ch in self.player.opponent().characters:
             dis = utility.distance_between((self.x, self.y), (ch.x, ch.y))
             if(dis<=self.mad_movement_range):
-                Character.damage_to(ch, self.lethal_damage)
+                Character.damage_to(ch, self.lethal_damage/self.mad_movement_range)
     def passive_change(self):
         self.frame += 1
         self.gauge += self.gauge_speed*stg.DT
@@ -422,10 +422,10 @@ class Miura(Character):
         self.gauge_speed = 0.09*0.3
         self.bullet_damage = 2800
         self.bullet_radius = 6/stg.SCALE
-        self.bullet_duration = 60
+        self.bullet_duration = 40
         self.max_succession = 1
         self.bullet_attack_interval_second = 0.5
-        self.great_kick_duration = 10
+        self.great_kick_duration = 5
         self.great_kick_range = 300/stg.SCALE
         self.latest_lethal_frame = None
         self.lethal_dest = (None, None)
