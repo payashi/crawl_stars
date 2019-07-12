@@ -34,6 +34,7 @@ class Character:
         self.lethal_color = (255, 255, 0)
         self.status = "normal"
         self.lethal_gauge_speed =  0.03
+        self.bullet_speed = 10/stg.SCALE
     def all_move(stage):
         for p in stage.players:
             for ch in p.characters:
@@ -311,6 +312,7 @@ class Kimura(Character):
         self.lethal_damage = 2500
         self.lethal_dest = (None, None)
         self.lethal_end = False
+        self.radius = 15*1.5/stg.SCALE
     def trigger_lethal_blow(self, x, y): # kimura press
         if(not self.valid_lethal_blow(x, y)): return
         self.lethal_gauge = 0
