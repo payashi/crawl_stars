@@ -5,6 +5,4 @@ The game is really similar to *Brawl* *Stars* by [*Supercell*](https://supercell
 But the difference from the original is that the players of this game are not us, but NPCs operated by our codings.<br>
 I hope this game will be an amusing one for us.
 
-Yeah!!!(yamada editted.)
-
 ![demo](https://github.com/payashi/crawl_stars/blob/master/outputs/crawl_stars.gif)
