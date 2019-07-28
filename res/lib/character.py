@@ -312,7 +312,7 @@ class Kimura(Character):
         self.lethal_damage = 2500
         self.lethal_dest = (None, None)
         self.lethal_end = False
-        self.radius = 15*1.5/stg.SCALE
+        # self.radius = 15*1.5/stg.SCALE
     def trigger_lethal_blow(self, x, y): # kimura press
         if(not self.valid_lethal_blow(x, y)): return
         self.lethal_gauge = 0

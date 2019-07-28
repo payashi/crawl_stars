@@ -1,8 +1,3 @@
-'''
-How to omit module name?
-How to spot the index of an element?
-'''
-
 import sys, time
 
 import settings as stg
@@ -13,7 +8,7 @@ def main():
     st = lib.SimpleStage()
     st.register_players(
         lib.Player((256, 0, 0), "Kimura", 0),
-        lib.Player((0, 0, 256), "Kimura", 1)
+        lib.Player((0, 0, 256), "Sakaguchi", 1)
     )
     while(st.frame<=stg.MAX_FRAME):
         sys.stdout.write("\r{:0=3} / {} frame".format(st.frame, stg.MAX_FRAME))
