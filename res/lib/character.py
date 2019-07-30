@@ -116,6 +116,8 @@ class Character:
         ch.hp -= damage
         return True
     def detour_toward(self, x1, y1, x2, y2, shorter=True, right=True):
+        x2 = min(stg.WIDTH, max(0, x2))
+        y2 = min(stg.HEIGHT, max(0, y2))
         if(abs(x1-x2)+abs(y1-y2)==0): return (x2, y2)
         min_dis = stg.INF
         ret = (None, None)
@@ -298,7 +300,7 @@ class Kimura(Character):
         self.color = (255, 127, 80)
         self.lethal_color = (255, 255, 0)
         self.hp = 6000
-        self.hp_speed = 500
+        self.hp_speed = 20
         self.speed = 2.5/stg.SCALE
         self.gauge_speed = 0.11*0.3
         self.bullet_damage = 1000
@@ -366,7 +368,7 @@ class Sakaguchi(Character):
         self.color = (102, 0, 255)
         # self.lethal_color = (255, 0, 255)
         self.hp = 3000
-        self.hp_speed = 500
+        self.hp_speed = 20
         self.speed = 3.5/stg.SCALE
         self.gauge_speed = 0.11*0.3
         self.bullet_damage = 600
@@ -395,7 +397,7 @@ class Sakaguchi(Character):
         for ch in self.player.opponent().characters:
             dis = utility.distance_between((self.x, self.y), (ch.x, ch.y))
             if(dis<=self.mad_movement_range):
-                Character.damage_to(ch, self.lethal_damage/self.mad_movement_range)
+                Character.damage_to(ch, self.lethal_damage/self.mad_movement_duration)
     def passive_change(self):
         self.frame += 1
         self.gauge += self.gauge_speed*stg.DT
@@ -419,7 +421,7 @@ class Miura(Character):
         super().__init__(x, y, player, character)
         self.color = (0, 0, 0)
         self.hp = 4500
-        self.hp_speed = 500
+        self.hp_speed = 20
         self.speed = 3/stg.SCALE
         self.gauge_speed = 0.09*0.3
         self.bullet_damage = 2800

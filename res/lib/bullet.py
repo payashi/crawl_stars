@@ -45,7 +45,7 @@ class Bullet:
             and obs.y1-self.radius<self.y and self.y<obs.y2+self.radius):
                 return True
         attack = self.attack
-        k = 1-self.time/self.duration # 1->0
+        k = self.time/self.duration # 1->0
         if(self.character.__class__.__name__=="Kimura"):
             attack *= 0.5+k
         elif(self.character.__class__.__name__=="Sakaguchi"):

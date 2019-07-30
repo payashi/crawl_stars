@@ -15,14 +15,13 @@ class Stage:
         self.draw = None
         self.im = None
         self.scale = stg.SCALE
+        self.obstacles = []
     def register_players(self, first_player, second_player):
         first_player.stage = self
         second_player.stage = self
         self.first_player = first_player
         self.second_player = second_player
         self.players = [first_player, second_player]
-    def opponent_player(self, player):
-        return self.first_player if player == self.second_player else self.second_player
     def pre_draw(self):
         self.im = Image.new('RGB', utility.scaling((stg.WIDTH, stg.HEIGHT), self.scale), stg.color_background)
         self.draw = ImageDraw.Draw(self.im)
@@ -59,7 +58,6 @@ class SimpleStage(Stage):
     def __init__(self):
         super().__init__()
         self.name = "Simple Stage"
-        self.obstacles = []
         self.obstacles.append(obstacle.Wall(stg.WIDTH*0.1, stg.HEIGHT*0.2, stg.WIDTH*0.6, stg.HEIGHT*0.25))
         self.obstacles.append(obstacle.Pond(stg.WIDTH*0.4, stg.HEIGHT*0.35, stg.WIDTH*0.9, stg.HEIGHT*0.4))
         self.obstacles.append(obstacle.Pond(stg.WIDTH*0.1, stg.HEIGHT*0.6, stg.WIDTH*0.6, stg.HEIGHT*0.65))

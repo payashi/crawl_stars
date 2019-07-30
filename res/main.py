@@ -7,7 +7,7 @@ from comp import mv
 def main():
     st = lib.SimpleStage()
     st.register_players(
-        lib.Player((256, 0, 0), "Kimura", 0),
+        lib.Player((256, 0, 0), "Sakaguchi", 0),
         lib.Player((0, 0, 256), "Sakaguchi", 1)
     )
     while(st.frame<=stg.MAX_FRAME):
