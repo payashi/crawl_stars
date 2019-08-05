@@ -53,6 +53,6 @@ class Bullet:
         ret = False
         for ch in self.character.player.opponent().characters:
             if(utility.distance_between((ch.x, ch.y), (self.x, self.y))<self.radius+ch.radius and \
-            character.Character.damage_to(ch, attack)):
+            character.Character.damage_to(ch, self.character, attack)):
                 ret = True
         return ret
