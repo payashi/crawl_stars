@@ -2,4 +2,4 @@
 __pycache__/
 outputs/*
 !outputs/crawl_stars.gif
-comp/*
+res/comp/*
