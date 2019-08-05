@@ -5,9 +5,9 @@ The game is really similar to *Brawl Stars* by [*Supercell*](https://supercell.c
 But the difference from the original is that the players of this game are not us, but NPCs operated by our codings.<br>
 I hope this game will be an amusing one for us.<br>
 ## Collaborators
-payashi:  it's me. I'm a beginner programmer, learning python, competitive programming and so on.
-piroyama: an expert at competitive programmer.
-matope:   one of top Japanese players of *Clash of Clans*, and also a good player of *Brawl Stars*.
+payashi:  it's me. I'm a beginner programmer, learning python, competitive programming and so on.<br>
+piroyama: an expert at competitive programmer.<br>
+matope:   one of top Japanese players of *Clash of Clans*, and also a good player of *Brawl Stars*.<br><br>
 
 I will face a joint team of the two
 ## Example Match
