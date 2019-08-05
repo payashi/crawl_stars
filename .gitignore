@@ -1,5 +1,5 @@
 .DS_Store
 __pycache__/
 outputs/*
-!outputs/
+!outputs/crawl_stars.gif
 comp/crawl_stars.gif
