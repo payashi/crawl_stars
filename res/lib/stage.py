@@ -28,6 +28,9 @@ class Stage:
         for obs in self.obstacles:
             self.draw.rectangle(utility.scaling((obs.x1, obs.y1, obs.x2, obs.y2), self.scale),\
                 fill=obs.color, outline=stg.color_outline)
+        if self.__class__.__name__ == "IwasshoiStage":
+            font=ImageFont.truetype('/System/Library/Fonts/ヒラギノ角ゴシック W4.ttc', 320)
+            self.draw.text((stg.WIDTH*stg.SCALE*0.24, stg.HEIGHT*stg.SCALE*0.3), "Iwa", fill=(107, 118, 135), font=font)
     def draw_field(self):
         for p in self.players:
             for ch in p.characters:
@@ -58,7 +61,52 @@ class SimpleStage(Stage):
     def __init__(self):
         super().__init__()
         self.name = "Simple Stage"
+        stg.WIDTH = 600/stg.SCALE
+        stg.HEIGHT = 1000/stg.SCALE
         self.obstacles.append(obstacle.Wall(stg.WIDTH*0.1, stg.HEIGHT*0.2, stg.WIDTH*0.6, stg.HEIGHT*0.25))
         self.obstacles.append(obstacle.Pond(stg.WIDTH*0.4, stg.HEIGHT*0.35, stg.WIDTH*0.9, stg.HEIGHT*0.4))
         self.obstacles.append(obstacle.Pond(stg.WIDTH*0.1, stg.HEIGHT*0.6, stg.WIDTH*0.6, stg.HEIGHT*0.65))
         self.obstacles.append(obstacle.Wall(stg.WIDTH*0.4, stg.HEIGHT*0.75, stg.WIDTH*0.9, stg.HEIGHT*0.8))
+
+class BlankStage(Stage):
+    def __init__(self):
+        super().__init__()
+        self.name = "Blank Stage"
+        stg.WIDTH = 1000/stg.SCALE
+        stg.HEIGHT = 1000/stg.SCALE
+
+class RiverStage(Stage):
+    def __init__(self):
+        super().__init__()
+        self.name = "River Stage"
+        stg.WIDTH = 600/stg.SCALE
+        stg.HEIGHT = 1000/stg.SCALE
+        self.obstacles.append(obstacle.Pond(stg.WIDTH*0, stg.HEIGHT*0.45, stg.WIDTH*1, stg.HEIGHT*0.55))
+
+class WallStage(Stage):
+    def __init__(self):
+        super().__init__()
+        self.name = "Wall Stage"
+        stg.WIDTH = 1000/stg.SCALE
+        stg.HEIGHT = 1000/stg.SCALE
+        self.obstacles.append(obstacle.Wall(-stg.WIDTH*1, stg.HEIGHT*0.18, stg.WIDTH*0.7, stg.HEIGHT*0.22))
+        self.obstacles.append(obstacle.Wall(stg.WIDTH*0.3, stg.HEIGHT*0.78, stg.WIDTH*2, stg.HEIGHT*0.82))
+        self.obstacles.append(obstacle.Wall(stg.WIDTH*0.3, stg.HEIGHT*0.38, stg.WIDTH*0.7, stg.HEIGHT*0.42))
+        self.obstacles.append(obstacle.Wall(stg.WIDTH*0.3, stg.HEIGHT*0.58, stg.WIDTH*0.7, stg.HEIGHT*0.62))
+        self.obstacles.append(obstacle.Wall(stg.WIDTH*0.75, stg.HEIGHT*0.38, stg.WIDTH*2, stg.HEIGHT*0.42))
+        self.obstacles.append(obstacle.Wall(-stg.WIDTH*1, stg.HEIGHT*0.58, stg.WIDTH*0.25, stg.HEIGHT*0.62))
+
+class IwasshoiStage(Stage):
+    def __init__(self):
+        super().__init__()
+        self.name = "Iwasshoi Stage"
+        stg.WIDTH = 1000/stg.SCALE
+        stg.HEIGHT = 1000/stg.SCALE
+        self.obstacles.append(obstacle.Wall(stg.WIDTH*0.2, stg.HEIGHT*0.2, stg.WIDTH*0.4, stg.HEIGHT*0.25))
+        self.obstacles.append(obstacle.Wall(stg.WIDTH*0.2, stg.HEIGHT*0.2, stg.WIDTH*0.25, stg.HEIGHT*0.4))
+        self.obstacles.append(obstacle.Wall(stg.WIDTH*0.6, stg.HEIGHT*0.2, stg.WIDTH*0.8, stg.HEIGHT*0.25))
+        self.obstacles.append(obstacle.Wall(stg.WIDTH*0.75, stg.HEIGHT*0.2, stg.WIDTH*0.8, stg.HEIGHT*0.4))
+        self.obstacles.append(obstacle.Wall(stg.WIDTH*0.2, stg.HEIGHT*0.6, stg.WIDTH*0.25, stg.HEIGHT*0.8))
+        self.obstacles.append(obstacle.Wall(stg.WIDTH*0.2, stg.HEIGHT*0.75, stg.WIDTH*0.4, stg.HEIGHT*0.8))
+        self.obstacles.append(obstacle.Wall(stg.WIDTH*0.6, stg.HEIGHT*0.75, stg.WIDTH*0.8, stg.HEIGHT*0.8))
+        self.obstacles.append(obstacle.Wall(stg.WIDTH*0.75, stg.HEIGHT*0.6, stg.WIDTH*0.8, stg.HEIGHT*0.8))

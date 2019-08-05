@@ -5,7 +5,8 @@ import lib
 from comp import mv
 
 def main():
-    st = lib.SimpleStage()
+    # st = lib.SimpleStage()
+    st = lib.IwasshoiStage()
     st.register_players(
         lib.Player((256, 0, 0), "Hayashi", 0),
         lib.Player((0, 0, 256), "Yamatope", 1)
@@ -16,8 +17,8 @@ def main():
         # time.sleep(0.01)
         st.pre_draw()
         lib.Character.all_passive_change(st)
-        mv.yamatope_moves(st.players[0])
-        mv.yamatope_moves(st.players[1])
+        mv.lethal_hayashi(st.players[0])
+        mv.weak_hayashi(st.players[1])
         lib.Character.all_move(st)
         lib.Bullet.all_move(st)
         lib.Character.all_lethal_blow(st)
