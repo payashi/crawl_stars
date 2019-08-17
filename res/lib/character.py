@@ -126,8 +126,8 @@ class Character:
             if(obs.x1-self.radius<x2 and x2<obs.x2+self.radius \
             and obs.y1-self.radius<y2 and y2<obs.y2+self.radius):
                 for i in range(4):
-                    vx1, vy1 = obs.ith_virtual_vertex(i, self.radius)
-                    vx2, vy2 = obs.ith_virtual_vertex(i+1, self.radius)
+                    vx1, vy1 = obs.ith_virtual_vertex(i, self.radius*1.01)
+                    vx2, vy2 = obs.ith_virtual_vertex(i+1, self.radius*1.01)
                     if(i%2==0):
                         cx, cy = obstacle.collision_check(self, x2, y2, vx1, vx2, vy1, True)
                     else:
@@ -280,7 +280,6 @@ class Character:
                         if right: index += 3
                     if(index!=-1): ret = obs.ith_virtual_vertex(index%4, self.radius)
         if(ret != (None, None)):
-            iw = ret
             ret = self.detour_toward(x1, y1, ret[0], ret[1], shorter, right)
             return ret
         else:

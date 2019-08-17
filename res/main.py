@@ -4,9 +4,8 @@ import settings as stg
 import lib
 from comp import mv
 
-def main():
+def main(st):
     # st = lib.SimpleStage()
-    st = lib.IwasshoiStage()
     st.register_players(
         lib.Player((256, 0, 0), "Hayashi", 0),
         lib.Player((0, 0, 256), "Yamatope", 1)
@@ -17,7 +16,7 @@ def main():
         # time.sleep(0.01)
         st.pre_draw()
         lib.Character.all_passive_change(st)
-        mv.yamatope_moves(st.players[0])
+        mv.lethal_hayashi(st.players[0])
         mv.yamatope_moves(st.players[1])
         lib.Character.all_move(st)
         lib.Bullet.all_move(st)
@@ -29,6 +28,10 @@ def main():
     sys.stdout.write("\nnow drawing...")
     st.output()
     sys.stdout.write("\033[2K\033[G")
-    sys.stdout.write("finished!!\n")
+    sys.stdout.write(st.__class__.__name__ + " has finished!!\n")
 
-main()
+main(lib.SimpleStage())
+main(lib.BlankStage())
+main(lib.RiverStage())
+main(lib.WallStage())
+main(lib.IwasshoiStage())
