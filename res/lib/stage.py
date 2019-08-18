@@ -57,7 +57,7 @@ class Stage:
         self.images.append(self.im)
     def output(self):
         # self.images[0].save(os.getcwd()+'/outputs/' + self.__class__.__name__ + '.gif', save_all=True, append_images=self.images[1:], optimize=False, duration=40)
-        self.images[0].save('crawl_stars/outputs/' + self.__class__.__name__ + '.gif', save_all=True, append_images=self.images[1:], optimize=False, duration=40)
+        self.images[0].save('crawl_stars/outputs/' + self.__class__.__name__ + '2.gif', save_all=True, append_images=self.images[1:], optimize=False, duration=40)
 class SimpleStage(Stage):
     def __init__(self):
         super().__init__()
