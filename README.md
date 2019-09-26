@@ -11,4 +11,4 @@ MATOPE:   one of top Japanese players of *Clash of Clans*, and also a good playe
 
 I will face a joint team of the two
 ## Example Match
-![demo](https://github.com/payashi/crawl_stars/blob/master/outputs/crawl_stars.gif)
+![demo](https://github.com/payashi/crawl_stars/blob/master/demo.gif)
