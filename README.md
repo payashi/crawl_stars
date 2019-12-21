@@ -6,7 +6,7 @@ But the difference from the original is that the players of this game are not us
 I hope this game will be an amusing one for us.<br>
 ## Collaborators
 payashi:  it's me. I'm a beginner programmer, learning python, competitive programming and so on.<br>
-piroyama: an expert at competitive programmer.<br>
+piroyama: an expert at competitive programming.<br>
 MATOPE:   one of top Japanese players of *Clash of Clans*, and also a good player of *Brawl Stars*.<br><br>
 
 I will face a joint team of the two
